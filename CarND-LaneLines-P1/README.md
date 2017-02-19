@@ -1,102 +1,116 @@
-#**Finding Lane Lines on the Road** 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+## Finding Lane Lines on the Road
 
-<img src="laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
 
-Overview
+The goals / steps of this project are the following:
+* Make a pipeline that finds lane lines on the road
+* Reflect on your work in a written report
+
+
+[//]: # (Image References)
+
+[image1]: ./examples/0.whiteCarLaneSwitch.jpg "Original image"
+[image2]: ./examples/1.processed-whiteCarLaneSwitch.png "Grayscale"
+[image3]: ./examples/2.processed-whiteCarLaneSwitch.png "Gaussian Blur"
+[image4]: ./examples/3.processed-whiteCarLaneSwitch.png "Canny Edge"
+[image5]: ./examples/4.processed-whiteCarLaneSwitch.png "Region of interest"
+[image6]: ./examples/5.processed-whiteCarLaneSwitch.png "Hough Transform"
+[image7]: ./examples/6.processed-whiteCarLaneSwitch.png "Slope Filter"
+[image8]: ./examples/7.processed-whiteCarLaneSwitch.png "Final result"
+[image9]: ./examples/hilly_road.jpg "Hilly road"
 ---
 
-When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
+## Reflection
 
-In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
+####1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
 
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
+#### Pipeline:
 
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
+My pipeline consisted of 7 steps. 
+
+- Step 0 : Original image
+![alt text][image1]
+- Step 1 : Convert the images to grayscale
+![alt text][image2]
+- Step 2 : Apply a Gaussian Blur
+![alt text][image3]
+- Step 3 : Run a Canny Edge Detection
+![alt text][image4]
+- Step 4 : Apply a mask to restrict the region of interest (ROI)
+![alt text][image5]
+- Step 5 : Detect lines throught a Hough Transform
+![alt text][image6]
+- Step 6 : Filter out the lines according to their slopes
+![alt text][image7]
+- Step 7 : Draw two single overlaying lines over the original image from the mean values of the remaining lines
+![alt text][image8]
+
+#### draw_lines() function:
+
+In order to draw a single line on the left and right lanes, I modified the *draw_lines()* function.
 
 
-Creating a Great Writeup
----
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
-1. Describe the pipeline
-2. Identify any shortcomings
-3. Suggest possible improvements
+    def draw_lines(img, lines, roi_top, roi_bottom, min_slope, max_slope, color=[255, 0, 0], thickness=2):
 
-We encourage using images in your writeup to demonstrate how your pipeline works.  
+        #Initialize variables
+        sum_fit_left = 0
+        sum_fit_right = 0
+        number_fit_left = 0
+        number_fit_right = 0
 
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
+        for line in lines:
+            for x1,y1,x2,y2 in line:
+                #find the slope and offset of each line found (y=mx+b)
+                fit = np.polyfit((x1, x2), (y1, y2), 1)
 
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
+                #limit the slope to plausible left lane values and compute the mean slope/offset
+                if fit[0] >= min_slope and fit[0] <= max_slope:
+                    sum_fit_left = fit + sum_fit_left
+                    number_fit_left = number_fit_left + 1
+
+                #limit the slope to plausible right lane values and compute the mean slope/offset
+                if fit[0] >= -max_slope and fit[0] <= -min_slope:
+                    sum_fit_right = fit + sum_fit_right
+                    number_fit_right = number_fit_right + 1
+
+        #avoid division by 0
+        if number_fit_left > 0:
+            #Compute the mean of all fitted lines
+            mean_left_fit = sum_fit_left/number_fit_left
+            #Given two y points (bottom of image and top of region of interest), compute the x coordinates
+            x_top_left    = int((roi_top - mean_left_fit[1])/mean_left_fit[0])
+            x_bottom_left = int((roi_bottom - mean_left_fit[1])/mean_left_fit[0])
+            #Draw the line
+            cv2.line(img, (x_bottom_left,roi_bottom), (x_top_left,roi_top), [255, 0, 0], 5)
+        else:
+            mean_left_fit = (0,0)
+
+        if number_fit_right > 0:
+            #Compute the mean of all fitted lines
+            mean_right_fit = sum_fit_right/number_fit_right
+            #Given two y points (bottom of image and top of region of interest), compute the x coordinates
+            x_top_right    = int((roi_top - mean_right_fit[1])/mean_right_fit[0])
+            x_bottom_right = int((roi_bottom - mean_right_fit[1])/mean_right_fit[0])
+            #Draw the line
+            cv2.line(img, (x_bottom_right,roi_bottom), (x_top_right,roi_top), [255, 0, 0], 5)
+        else:
+            fit_right_mean = (0,0)
 
 
-The Project
----
+-First it does a ***np.polyfit()*** on each line returned by the ***cv2.HoughLinesP()*** function.
+-Then it filters out the lines with "not so plausible" slopes.
+-It then computes the arrithmetic mean of the "m" and the "b" parameter (*y=mx+b*) for the left lane line and the right lane line.
+-Since, the top and the botom of the region of interest is passed by the function parameters, it is then a matter of isolating x in *y=mx+b* to find the x coordinate of the lines extremities.
+-It finaly calls the ***cv2.line()*** function to draw the lines the image passed in the function parameters.
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you can install the starter kit or follow the install instructions below to get started on this project. ##
+###2. Identify potential shortcomings with your current pipeline
 
-**Step 1:** Getting setup with Python
+In my opinion, the major shortcomming of this pipeline would be that it assumes a praticaly straight road since it is designed to reject lines with too shallow slopes, it will therefore reject the lane lines when the road is too curvy. It will also be problematic on hilly roads where the algoritm can't "see" the rest of the road ahead because the camera is pointing towards the sky. This is without mentionning the case where a hilly road would result on multiple disconnected line detections (see the picture below). Debris on the road are also at risk of be accepted as line by the algorithm... Finaly, I believe that a bumpy road can shake the car enough to offset the lanes outside of the regions of interest mask temporarily.
+![alt text][image9]
 
-To do this project, you will need Python 3 along with the numpy, matplotlib, and OpenCV libraries, as well as Jupyter Notebook installed. 
+Another shortcoming could be that it seemed influenced by the lighting/color of the road, especially when I tried the *challenge.mp4* video. In that video, you can see the car going by a tree that projects a shadow on the road, then the road suface is  transitionning from asphalt to concrete and comes back to concrete exactly at the same time as the car passes by another tree. This causes the lane detection algorithm to go haywire, confusing all those contrasts to be lanes.
 
-We recommend downloading and installing the Anaconda Python 3 distribution from Continuum Analytics because it comes prepackaged with many of the Python dependencies you will need for this and future projects, makes it easy to install OpenCV, and includes Jupyter Notebook.  Beyond that, it is one of the most common Python distributions used in data analytics and machine learning, so a great choice if you're getting started in the field.
+###3. Suggest possible improvements to your pipeline
 
-Choose the appropriate Python 3 Anaconda install package for your operating system <A HREF="https://www.continuum.io/downloads" target="_blank">here</A>.   Download and install the package.
+A possible improvement would be to be able to adapt the region of interess dynamicaly, following inputs like the steering angle, pitch/yaw/roll rate, x,y,z accel...
 
-If you already have Anaconda for Python 2 installed, you can create a separate environment for Python 3 and all the appropriate dependencies with the following command:
-
-`>  conda create --name=yourNewEnvironment python=3 anaconda`
-
-`>  source activate yourNewEnvironment`
-
-**Step 2:** Installing OpenCV
-
-Once you have Anaconda installed, first double check you are in your Python 3 environment:
-
-`>python`    
-`Python 3.5.2 |Anaconda 4.1.1 (x86_64)| (default, Jul  2 2016, 17:52:12)`  
-`[GCC 4.2.1 Compatible Apple LLVM 4.2 (clang-425.0.28)] on darwin`  
-`Type "help", "copyright", "credits" or "license" for more information.`  
-`>>>`   
-(Ctrl-d to exit Python)
-
-run the following commands at the terminal prompt to get OpenCV:
-
-`> pip install pillow`  
-`> conda install -c menpo opencv3=3.1.0`
-
-then to test if OpenCV is installed correctly:
-
-`> python`  
-`>>> import cv2`  
-`>>>`  (i.e. did not get an ImportError)
-
-(Ctrl-d to exit Python)
-
-**Step 3:** Installing moviepy  
-
-We recommend the "moviepy" package for processing video in this project (though you're welcome to use other packages if you prefer).  
-
-To install moviepy run:
-
-`>pip install moviepy`  
-
-and check that the install worked:
-
-`>python`  
-`>>>import moviepy`  
-`>>>`  (i.e. did not get an ImportError)
-
-(Ctrl-d to exit Python)
-
-**Step 4:** Opening the code in a Jupyter Notebook
-
-You will complete this project in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out <A HREF="https://www.packtpub.com/books/content/basics-jupyter-notebook-and-python" target="_blank">Cyrille Rossant's Basics of Jupyter Notebook and Python</A> to get started.
-
-Jupyter is an ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, run the following command at the terminal prompt (be sure you're in your Python 3 environment!):
-
-`> jupyter notebook`
-
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
-
-**Step 5:** Complete the project and submit both the Ipython notebook and the project writeup
-
+Another potential improvement could be to be able to flater out the image as much as possible. The idea would be to feed a perfectly ligthed scene to our lane detection pipeline every time.

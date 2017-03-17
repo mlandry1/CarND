@@ -6,6 +6,40 @@
 
 ---
 
+
+##Idées en vrac
+
+**1x1 convolution**
+
+1x1 convolution was introduced in Lesson 8, topic 28 by Vincent Vanhoucke. I thought that there must something to do with it to improve the Le Net Network. After a couple of Google search on the subject, I figured something useful to do with it. The idea of applying a 1x1 convolution directly on the input image is to let the network modifiy the color map to best fit it learning needs. 
+
+**- Contrast Limited Adaptive Histogram Equalization (CLAHE)**
+
+http://docs.opencv.org/3.1.0/d5/daf/tutorial_py_histogram_equalization.html
+
+Sortir des images avec l'histogramme
+
+**Inception module... !**
+
+
+**Fully connected layers **
+
+Expansion du nombre de neuronne, pour tenir compte du nombre de classe plus grandd que dans le cas du LeNet basique..
+
+
+data augmentation
+pre-processing on images
+initializations of Networks
+some tips during training
+selections of activation functions
+diverse regularizations
+some insights found from figures
+methods of ensemble multiple deep networks
+
+
+http://www.kdnuggets.com/2016/03/must-know-tips-deep-learning-part-1.html
+
+
 **Build a Traffic Sign Recognition Project**
 
 The goals / steps of this project are the following:

@@ -3,11 +3,11 @@
 [image1]: ./examples/visualization.jpg "Visualization"
 [image2]: ./examples/grayscale.jpg "Grayscaling"
 [image3]: ./examples/random_noise.jpg "Random Noise"
-[image4]: ./examples/placeholder.png "Traffic Sign 1"
-[image5]: ./examples/placeholder.png "Traffic Sign 2"
-[image6]: ./examples/placeholder.png "Traffic Sign 3"
-[image7]: ./examples/placeholder.png "Traffic Sign 4"
-[image8]: ./examples/placeholder.png "Traffic Sign 5"
+[image4]: ./examples/bumpyroad.jpg "Bumpy Road Traffic Sign"
+[image5]: ./examples/Generalcaution.jpg "General Caution Traffic Sign"
+[image6]: ./examples/limit30.jpg "30kph Limit Traffic Sign"
+[image7]: ./examples/limit70.jpg "70kph Limit Traffic Sign"
+[image8]: ./examples/nopassing.jpg "No Passing Traffic Sign"
 [image9]: ./examples/tr.jpeg "Cover image"
 [image10]: ./examples/histogram_before.png "Histogram of the training dataset"
 [image11]: ./examples/Training_dataset_sample_before.png "Sample of the training dataset"
@@ -271,7 +271,7 @@ I added a bit of dropout on the fully connected layer to regularize the training
 
 The code for training the model is located in the 10th, 11th, 12th, 13th and 14th cells of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
 
-To train the model, I used a batch size of 256, a maximum epochs number of 100 and a fix learning rate of 0.001. I also used a early stopping criteria to prevent overfitting.
+To train the model, I used a batch size of 256, a maximum epochs number of 100 and a fixed learning rate of 0.001. I also used a early stopping criteria to prevent overfitting. I used *adamoptimizer* with default settings for optimization. The optimization process itself took about 1 hour on a AWS small instance.
 
 ####5. Describe the approach taken for finding a solution. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
 
@@ -279,16 +279,13 @@ The code for calculating the accuracy of the model is located in the ninth cell 
 
 My final model results were:
 * Training set accuracy : 99.0%
-* Validation set accuracy : 97.6%
+* Validation set accuracy : 98.0%
 * Test set accuracy : 94.9%
 
-I choose the 
+I choose the model from the suggested article. I believed it was revelant since a great name in the domain is on the paper (Yann Lecun). Plus their model is applied on exactly the same dataset as us. This paper also sets a new "test" accuracy reccord for the dataset and finaly Udacity suggested the article to its students so it must be a bit relevant! The model looks very much alike the original LeNet model but it uses an inovative connection that skips the second convolution layer to get directly to the fully connected layer.
 
-* Why did you believe it would be relevant to the traffic sign application?
-* How does the final model's accuracy on the traini
-ng, validation and test set provide evidence that the model is working well?
+I think my model's performance is correct without being outstanding. From the discrepancy between the training accuracy and the test accuracy figures, we can see that the model has been a bit overfitting the training and validation set. Its ability to generalize seems a bit comprised. Maybe better/more agressive regularization techniques would have helped, along with a better stopping criteria. A decaying learning rate would also have been nice to play arround with..
  
-
 ###Test a Model on New Images
 
 ####1. Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
@@ -298,7 +295,15 @@ Here are five German traffic signs that I found on the web:
 ![alt text][image4] ![alt text][image5] ![alt text][image6] 
 ![alt text][image7] ![alt text][image8]
 
-The first image might be difficult to classify because ...
+The first image (bumpy road) should be easy to classify since the sign is perfectly ligthed and level. The texture and the watermark on the white part may be tricky for the model, but should be ok.
+
+The 2nd image (General Caution) should be a bit more difficult to classify since the sign is titled.
+
+In the 3rd image (30km/h) we see a perspective effect that deforms the sign in a way that wasn't teached to the model. But since the defromation seems minor, I expect the model to be able to recognize the sign.
+
+The 4th image (70km/h) should be the easiest to classify since it is the one with the crispiest image with any defromation/tilt
+
+The 5th image (no passing) should be difficult to classify because of the watermark on top of it.
 
 ####2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. Identify where in your code predictions were made. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
 
@@ -306,16 +311,15 @@ The code for making predictions on my final model is located in the tenth cell o
 
 Here are the results of the prediction:
 
-| Image			        |     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Stop Sign      		| Stop sign   									| 
-| U-turn     			| U-turn 										|
-| Yield					| Yield											|
-| 100 km/h	      		| Bumpy Road					 				|
-| Slippery Road			| Slippery Road      							|
+| Image	                         |     Prediction                         | 
+|:------------------------------:|:------------------------------------:| 
+| Bumpy road      		| Bumpy road   		        | 
+| General Caution		| General Caution	   		|
+| 30 km/h			| 30 km/h				|
+| 70 km/h	      		| 70 km/h		                |
+| No passing    		| No passing                    	|
 
-
-The model was able to correctly guess 4 of the 5 traffic signs, which gives an accuracy of 80%. This compares favorably to the accuracy on the test set of ...
+The model was able to correctly guess 5o f the 5 traffic signs, which gives an accuracy of 100%. This compares favorably to the accuracy on the test set (94.9%)..
 
 ####3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction and identify where in your code softmax probabilities were outputted. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
 

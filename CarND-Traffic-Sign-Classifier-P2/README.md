@@ -21,6 +21,12 @@
 [image19]: ./examples/ConvNet.png "Pierre Sermanet's and Yann LeCun's Conv Net Architecture"
 [image20]: ./examples/architecture.png "My Conv Net Architecture"
 [image21]: ./examples/mean_variance.png "Input data mean and variance"
+[image22]: ./examples/web_images_classified.png "Web images classified"
+[image23]: ./examples/softmax_prob1.png "70kph sign top 5 predictions"
+[image24]: ./examples/softmax_prob2.png "30kph sign top 5 predictions"
+[image25]: ./examples/softmax_prob3.png "General Caution sign top 5 predictions"
+[image26]: ./examples/softmax_prob4.png "No Passing top 5 predictions"
+[image27]: ./examples/softmax_prob5.png "Bumpy  top 5 predictions"
 
 
 ## Traffic Sign Recognition Program
@@ -45,7 +51,7 @@
 
 Overview
 ---
-In this project, I have implemented a classifier using convolutional neural networks. 
+In this project, I have implemented a traffic sign classifier using convolutional neural networks. 
 
 
 The Project
@@ -61,8 +67,9 @@ The goals / steps of this project are the following:
 
 Test results
 ---
-**Validation accuracy** : 97.9%
-**Test accuracy** : 95.3%
+**Training accuracy** : 99.6%
+**Validation accuracy** : 98.8%
+**Test accuracy** : 96.2%
 
 ## Rubric Points
 See the [Rubric Points](https://review.udacity.com/#!/rubrics/481/view)  for this project.
@@ -269,13 +276,13 @@ I added a bit of dropout on the fully connected layer to regularize the training
 
 ####4. Describe how, and identify where in your code, you trained your model. The discussion can include the type of optimizer, the batch size, number of epochs and any hyperparameters such as learning rate.
 
-The code for training the model is located in the 10th, 11th, 12th, 13th and 14th cells of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
+The code for training the model is located in the 10th, 11th, 12th, 13th and 14th code cells of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
 
 To train the model, I used a batch size of 256, a maximum epochs number of 100 and a fixed learning rate of 0.001. I also used a early stopping criteria to prevent overfitting. I used *adamoptimizer* with default settings for optimization. The optimization process itself took about 1 hour on a AWS small instance.
 
 ####5. Describe the approach taken for finding a solution. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
 
-The code for calculating the accuracy of the model is located in the ninth cell of the Ipython notebook.
+The code for calculating the accuracy of the model is located in the 15th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
 
 My final model results were:
 * Training set accuracy : 99.6%
@@ -295,19 +302,21 @@ Here are five German traffic signs that I found on the web:
 ![alt text][image4] ![alt text][image5] ![alt text][image6] 
 ![alt text][image7] ![alt text][image8]
 
+The code to load these images is located in the 16th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
+
 The first image (bumpy road) should be easy to classify since the sign is perfectly ligthed and level. The texture and the watermark on the white part may be tricky for the model, but should be ok.
 
 The 2nd image (General Caution) should be a bit more difficult to classify since the sign is titled.
 
 In the 3rd image (30km/h) we see a perspective effect that deforms the sign in a way that wasn't teached to the model. But since the defromation seems minor, I expect the model to be able to recognize the sign.
 
-The 4th image (70km/h) should be the easiest to classify since it is the one with the crispiest image with any defromation/tilt
+The 4th image (70km/h) should be the easiest to classify since it is the one with the crispiest image without any defromation/tilt
 
 The 5th image (no passing) should be difficult to classify because of the watermark on top of it.
 
 ####2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. Identify where in your code predictions were made. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
 
-The code for making predictions on my final model is located in the tenth cell of the Ipython notebook.
+The code for making predictions on my final model is located in the 17th cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
 
 Here are the results of the prediction:
 
@@ -319,21 +328,70 @@ Here are the results of the prediction:
 | 70 km/h	      		| 70 km/h		                |
 | No passing    		| No passing                    	|
 
-The model was able to correctly guess 5 of the 5 traffic signs, which gives an accuracy of 100%. This compares favorably to the accuracy on the test set (94.9%)..
+![alt text][image22]
+
+The model was able to correctly guess 5 of the 5 traffic signs, which gives an accuracy of 100%. This compares favorably to the accuracy on the test set (96.2%)...
 
 ####3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction and identify where in your code softmax probabilities were outputted. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
 
-The code for making predictions on my final model is located in the 11th cell of the Ipython notebook.
+The code for making predictions on my final model is located in the 18th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
 
-For the first image, the model is relatively sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
+For the first image, the model is relatively sure that this is a 70kph sign (probability of 0.61). The top five soft max probabilities were
 
-| Probability         	|     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
+| Probability         	|     Prediction	        		| 
+|:-----------------------:|:------------------------------------:| 
+| .61         		| Speed limit (70km/h)   	| 
+| .31    			| Speed limit (80km/h)	        |
+| .28				| Speed limit (20km/h)           |
+| .25	      			| Speed limit (30km/h)		|
+| .21				| Speed limit (120km/h) 	|
 
+![alt text][image23]
 
 For the second image ... 
+
+| Probability         	|     Prediction	        		| 
+|:-----------------------:|:------------------------------------:| 
+| .44         		| Speed limit (30km/h)   	| 
+| .24     			| Speed limit (80km/h)	        |
+| .17				| Speed limit (20km/h)           |
+| .08	      			| Speed limit (70km/h)		|
+| .05				| Speed limit (50km/h) 		|
+
+![alt text][image24]
+
+For the third image ... 
+
+| Probability         	|     Prediction	        		| 
+|:-----------------------:|:------------------------------------:| 
+| .74         		| General caution		  	| 
+| .21     			| Traffic signals		        |
+| .07				| Pedestrians  		                |
+| -.10      			| Bumpy Road				|
+| -.12			| Road narrows on the right	|
+
+![alt text][image25]
+
+For the fourth image ... 
+
+| Probability         	|     Prediction	        		| 
+|:-----------------------:|:------------------------------------:| 
+| .28         		| No passing  			  	| 
+| .22     			| No passing for vehicles over 3.5 metric tons         |
+| .13				| Vehicles over 3.5 metric tons prohibited	           |
+| -.04      			| No vehicles				|
+| -.07			| Stop					|
+
+![alt text][image26]
+
+For the fifth image ... 
+
+| Probability         	|     Prediction	        		| 
+|:-----------------------:|:------------------------------------:| 
+| .91         		| Bumpy road 		         	| 
+| .14     			| Slippery road 		        |
+| .11				| Bicycles crossing		        |
+| -.05			| Road work			        |
+| -.12			| Turn left ahead      		|
+
+![alt text][image27]

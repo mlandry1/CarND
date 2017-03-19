@@ -71,7 +71,7 @@ Here is a link to my [project code](https://github.com/mlandry1/CarND/blob/maste
 
 ###Data Set Summary & Exploration
 
-####1. Summary of the data set
+####1. Provide a basic summary of the data set and identify where in your code the summary was done. In the code, the analysis should be done using python, numpy and/or pandas methods rather than hardcoding results manually.
 
 For this project, we were asked to use the [German Trafic Sign Detection Benchmark](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset) (GTSRB) data. Download the formated dataset [here...](https://d17h27t6h515a5.cloudfront.net/topher/2017/February/5898cd6f_traffic-signs-data/traffic-signs-data.zip)
 I used the numpy library to calculate summary statistics of the traffic signs data set. The code for this step is contained in the second code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb) :
@@ -82,7 +82,7 @@ I used the numpy library to calculate summary statistics of the traffic signs da
 * The shape of a traffic sign image is (32,32,3).
 * The number of unique classes/labels in the data set is 43.
 
-####2. Exploratory visualization of the dataset
+####2. Include an exploratory visualization of the dataset and identify where the code is in your code file.
 
 The code for this step is contained in the third code cell of the  [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb) :
 
@@ -96,29 +96,7 @@ And here is a sample of the training dataset.
 
 ###Design and Test a Model Architecture
 
-#### Training data augmentation
-
-The code for this step is contained in the 4th and 5th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb) :
-
-Considering the great data inbalance seen in the above histogram, I've decided to "augment" my training set. Augmenting the training set helped me to improve the model performance. 
-
-In order to do my data augmentation, I've decided to follow the recommendations found in this suggested [article](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) written by Pierre Sermanet and Yann LeCun. First, I needed to code a function that randomly transforms dataset images. Common data augmentation techniques include rotation, translation, zoom, flips, and/or color perturbation. These techniques can be used individually or combined. I've decided to go with position ([-2,2] pixels), zoom ([.9,1.1] ratio) and rotation ([-15,+15] degrees), following Lecun's example. Plus I decided to add a brightness variation. 
-* I used *cv2.addWeighted()* for brightness variation, by adding (with random weight) a black or white image to the orignal image. I used this to overcome the overflow problem I was facing with other techniques.
-* I used *cv2.resize* for scale variation. I also used *cv2.copyMakeBorder* for image padding (with zeros) to keep a 32x32x3 image.
-* I used *cv2.getRotationMatrix2D" and *cv2.warpAffine* for my rotations.
-* Finaly, I used *cv2.warpAffine* with a manualy entered transformation matrix for my translations.
-
-Then I used this function in a loop to fill out the classes that needed more examples up to the number of examples of the most represented class.
-
-Here is a bar chart showing how the training data is now distributed accross the different classes.
-
-![alt text][image12]
-
-And here is a sample of the augmented training dataset:
-
-![alt text][image13]
-
-#### Training data preprocessing
+#### 1. Describe how, and identify where in your code, you preprocessed the image data. What tecniques were chosen and why did you choose these techniques? Consider including images showing the output of each preprocessing technique. Pre-processing refers to techniques such as converting to grayscale, normalization, etc.
 The code for this step is contained in the 6th, 7th and 8th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb)
 
 In order to do my data preprocessing, I inspired myself from the work presented in the suggested [article](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf)
@@ -141,31 +119,71 @@ As a last step, I normalized the image data in order to keep numerical stability
 On top of numerical stability, a well conditionned problem makes it a lot easier for the optimizer to do its job. In this lesson, Vincent also suggest that it is possible to normalize image data to get a zero mean. However in the TensorFlow introduction Lab at the end of lesson 6 we learned to do a min-max normalization on a grayscale image which yeilds a 0.5 mean value. I chose this last method since I had hands-on expericence with it and it preserves the ability to accurately show the image within a *matplotlib* figure.
 Here are the values of the previous grayscale image before normalization:
 ![alt text][image17]
-And here they are after normalization:
+And here they are after  normalization:
 ![alt text][image18]
 
 
 
-####2. Describe how, and identify where in your code, you set up training, validation and testing data. How much data was in each set? Explain what techniques were used to split the data into these sets. (OPTIONAL: As described in the "Stand Out Suggestions" part of the rubric, if you generated additional data for training, describe why you decided to generate additional data, how you generated the data, identify where in your code, and provide example images of the additional data)
 
-The code for splitting the data into training and validation sets is contained in the fifth code cell of the IPython notebook.  
 
-To cross validate my model, I randomly split the training data into a training set and validation set. I did this by ...
 
-My final training set had X number of images. My validation set and test set had Y and Z number of images.
 
-The sixth code cell of the IPython notebook contains the code for augmenting the data set. I decided to generate additional data because ... To add more data to the the data set, I used the following techniques because ... 
 
-Here is an example of an original image and an augmented image:
 
-![alt text][image3]
 
-The difference between the original data set and the augmented data set is the following ... 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### 2. Describe how, and identify where in your code, you set up training, validation and testing data. How much data was in each set? Explain what techniques were used to split the data into these sets. (OPTIONAL: As described in the "Stand Out Suggestions" part of the rubric, if you generated additional data for training, describe why you decided to generate additional data, how you generated the data, identify where in your code, and provide example images of the additional data)
+
+#### Data augmentation
+The code for this step is contained in the 4th and 5th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb) :
+
+Considering the great data inbalance seen in the above histogram, I've decided to "augment" my training set. Augmenting the training set helped me to improve the model performance. 
+
+In order to do my data augmentation, I've decided to follow the recommendations found in this suggested [article](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) written by Pierre Sermanet and Yann LeCun. First, I needed to code a function that randomly transforms dataset images. Common data augmentation techniques include rotation, translation, zoom, flips, and/or color perturbation. These techniques can be used individually or combined. I've decided to go with position ([-2,2] pixels), zoom ([.9,1.1] ratio) and rotation ([-15,+15] degrees), following Lecun's example. Plus I decided to add a brightness variation. 
+* I used *cv2.addWeighted()* for brightness variation, by adding (with random weight) a black or white image to the orignal image. I used this to overcome the overflow problem I was facing with other techniques.
+* I used *cv2.resize* for scale variation. I also used *cv2.copyMakeBorder* for image padding (with zeros) to keep a 32x32x3 image.
+* I used *cv2.getRotationMatrix2D" and *cv2.warpAffine* for my rotations.
+* Finaly, I used *cv2.warpAffine* with a manualy entered transformation matrix for my translations.
+
+Then I used this function in a loop to fill out the classes that needed more examples up to the number of examples of the most represented class.
+
+Here is a bar chart showing how the training data is now distributed accross the different classes.
+
+![alt text][image12]
+
+And here is a sample of the augmented training dataset:
+
+![alt text][image13]
+
+#### Validation set
+The supplied Pickle file already contained a Train, Testing and Validation set.
+
+After data augmentation :
+* My training set contained : 86430 examples
+* The validation set : 4410 examples
+* The testing set : 12630 examples
 
 
 ####3. Describe, and identify where in your code, what your final model architecture looks like including model type, layers, layer sizes, connectivity, etc.) Consider including a diagram and/or table describing the final model.
 
-The code for my final model is located in the seventh cell of the ipython notebook. 
+The code for my final model is located in the 9th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb)
 
 My final model consisted of the following layers:
 
@@ -186,35 +204,89 @@ My final model consisted of the following layers:
 | Fully connected | Fully Connected. Input = 9900, Output = 100 | Concatenate 1     | Softmax                     |
 | Softmax		| Fully Connected. Input = 100, Output = 43     | Fully connected   | Probabilities               |
 
-![alt text][image19]
 ![alt text][image20]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+I used the suggested as the starting point [article](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) to design this model architecture:
+
+> Usual ConvNets are organized in strict feed-forward layered architectures in which the output of one layer is fed only to the layer above. Instead, the output of the first stage is branched out and fed to the classifier, in addition to the output of the second stage [...]. [W]e use the output of the first stage after pooling/subsampling rather than before. Additionally, applying a second subsampling stage on the branched output yielded higher accuracies than with just one. Therefore the branched 1st-stage outputs are more subsampled than in traditional ConvNets but overall undergoes the same amount of subsampling [...] than the 2nd-stage outputs. The motivation for combining representation from multiple stages in the classifier is to provide different scales of receptive fields to the classifier. In the case of 2 stages of features, the second stage extracts “global” and invariant shapes and structures, while the first stage extracts “local” motifs with more precise details.
+
+I added a bit of dropout on the fully connected layer to regularize the training and prevent overfiting.
 
 ####4. Describe how, and identify where in your code, you trained your model. The discussion can include the type of optimizer, the batch size, number of epochs and any hyperparameters such as learning rate.
 
-The code for training the model is located in the eigth cell of the ipython notebook. 
+The code for training the model is located in the 10th, 11th, 12th, 13th and 14th cells of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
 
-To train the model, I used an ....
+To train the model, I used a batch size of 256, a maximum epochs number of 100 and a fix learning rate of 0.001. I also used a early stopping criteria to prevent overfitting.
 
 ####5. Describe the approach taken for finding a solution. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
 
 The code for calculating the accuracy of the model is located in the ninth cell of the Ipython notebook.
 
 My final model results were:
-* training set accuracy of ?
-* validation set accuracy of ? 
-* test set accuracy of ?
+* Training set accuracy : 99.0%
+* Validation set accuracy : 97.6%
+* Test set accuracy : 94.9%
 
-If an iterative approach was chosen:
-* What was the first architecture that was tried and why was it chosen?
-* What were some problems with the initial architecture?
-* How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to over fitting or under fitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.
-* Which parameters were tuned? How were they adjusted and why?
-* What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
+I choose the 
 
-If a well known architecture was chosen:
-* What architecture was chosen?
 * Why did you believe it would be relevant to the traffic sign application?
-* How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
+* How does the final model's accuracy on the traini
+ng, validation and test set provide evidence that the model is working well?
  
 
 ###Test a Model on New Images

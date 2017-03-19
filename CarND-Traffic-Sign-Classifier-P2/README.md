@@ -13,35 +13,20 @@
 [image11]: ./examples/Training_dataset_sample_before.png "Sample of the training dataset"
 [image12]: ./examples/histogram_after.png "Histogram of the training dataset after augmentation"
 [image13]: ./examples/AugmentedDataset.png "Sample of the dataset after augmentation"
+[image14]: ./examples/0_preprocess_original.png "Original sample"
+[image15]: ./examples/1_preprocess_equalize_histogram.png "Sample after Y histogram equalization"
+[image16]: ./examples/2_preprocess_grayscale.png "Sample after the grayscale conversion"
+[image17]: ./examples/3_preprocess_grayscale.png "Image values after the grayscale conversion"
+[image18]: ./examples/4_preprocess_normalize.png "Image values after the normalization"
+[image19]: ./examples/ConvNet.png "Pierre Sermanet's and Yann LeCun's Conv Net Architecture"
+[image20]: ./examples/architecture.png "My Conv Net Architecture"
+[image21]: ./examples/mean_variance.png "Input data mean and variance"
+
 
 ## Traffic Sign Recognition Program
 [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
 ![alt text][image9]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -109,83 +94,11 @@ Here is an exploratory visualization of the data set. It is a bar chart showing 
 And here is a sample of the training dataset.
 ![alt text][image11]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ###Design and Test a Model Architecture
 
 #### Training data augmentation
 
-The code for this step is contained in the fourth code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb) :
+The code for this step is contained in the 4th and 5th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb) :
 
 Considering the great data inbalance seen in the above histogram, I've decided to "augment" my training set. Augmenting the training set helped me to improve the model performance. 
 
@@ -195,7 +108,7 @@ In order to do my data augmentation, I've decided to follow the recommendations 
 * I used *cv2.getRotationMatrix2D" and *cv2.warpAffine* for my rotations.
 * Finaly, I used *cv2.warpAffine* with a manualy entered transformation matrix for my translations.
 
-Then I used this function in a loop to fill out the classes that needed more example up to the number of examples of the most represented class.
+Then I used this function in a loop to fill out the classes that needed more examples up to the number of examples of the most represented class.
 
 Here is a bar chart showing how the training data is now distributed accross the different classes.
 
@@ -206,16 +119,32 @@ And here is a sample of the augmented training dataset:
 ![alt text][image13]
 
 #### Training data preprocessing
+The code for this step is contained in the 6th, 7th and 8th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb)
 
-Describe how, and identify where in your code, you preprocessed the image data. What tecniques were chosen and why did you choose these techniques? Consider including images showing the output of each preprocessing technique. Pre-processing refers to techniques such as converting to grayscale, normalization, etc.
+In order to do my data preprocessing, I inspired myself from the work presented in the suggested [article](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf)
 
-As a first step, I decided to convert the images to grayscale because ...
+Here is the original image we will be studying as an example:
+![alt text][image14]
 
-Here is an example of a traffic sign image before and after grayscaling.
+As a first step, I would like to improve the contrast on the original image.
+The first steps I'm going trought are:
+* Convert the image to the YUV space using *cv2.cvtColor*
+* Equalize the Y channel histogram using *cv2.equalizeHist*.  I leave the U and V channels intacts.
+* Convert back the image to RGB using *cv2.cvtColor* once again.
+The process yields the following contrast improved image:
+![alt text][image15]
+In the article it is suggested that converting the images to grayscale further improve the network classification accuracy, so I decided to go for it as well:
+![alt text][image16]
 
-![alt text][image2]
+As a last step, I normalized the image data in order to keep numerical stability. Indeed, we have to keep the values involved in the calculation of the loss function in the same range (never too big or too small). As a guiding principle, Vincent Vanhoucke says (In section 23 of lesson 6) that we should have input data with zero and equal variance whenever its possible. 
+![alt text][image21]
+On top of numerical stability, a well conditionned problem makes it a lot easier for the optimizer to do its job. In this lesson, Vincent also suggest that it is possible to normalize image data to get a zero mean. However in the TensorFlow introduction Lab at the end of lesson 6 we learned to do a min-max normalization on a grayscale image which yeilds a 0.5 mean value. I chose this last method since I had hands-on expericence with it and it preserves the ability to accurately show the image within a *matplotlib* figure.
+Here are the values of the previous grayscale image before normalization:
+![alt text][image17]
+And here they are after normalization:
+![alt text][image18]
 
-As a last step, I normalized the image data because ...
+
 
 ####2. Describe how, and identify where in your code, you set up training, validation and testing data. How much data was in each set? Explain what techniques were used to split the data into these sets. (OPTIONAL: As described in the "Stand Out Suggestions" part of the rubric, if you generated additional data for training, describe why you decided to generate additional data, how you generated the data, identify where in your code, and provide example images of the additional data)
 
@@ -240,19 +169,25 @@ The code for my final model is located in the seventh cell of the ipython notebo
 
 My final model consisted of the following layers:
 
-| Layer         		|     Description	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Input         		| 32x32x3 RGB image   							| 
-| Convolution 3x3     	| 1x1 stride, same padding, outputs 32x32x64 	|
-| RELU					|												|
-| Max pooling	      	| 2x2 stride,  outputs 16x16x64 				|
-| Convolution 3x3	    | etc.      									|
-| Fully connected		| etc.        									|
-| Softmax				| etc.        									|
-|						|												|
-|						|												|
- 
 
+| Layer         |     Description	        					|  Input            |  Output                     |
+|:-------------:|:---------------------------------------------:|:-----------------:|:---------------------------:| 
+| Input         | 32x32x1 Grayscale image   					| Image             | Convolution 1               |
+| Convolution 1 | 1x1 stride, valid padding, outputs 28x28x100 	| Input             | RELU                        |
+| RELU 1		|												| Convolution 1     | Max Pooling 1               |
+| Max pooling 1	| 2x2 stride,  outputs 14x14x100 				| RELU 1            | Convolution 2, Max Pooling 3|
+| Convolution 2 | 1x1 stride, valid padding, outputs 10x10x200	| Max pooling 1     | RELU 2                      |
+| RELU 2		|												| Convolution 2     | Max pooling 2               |
+| Max pooling 2	| 2x2 stride,  outputs 5x5x200  				| RELU 2	        | Flatten 2                   |
+| Max pooling 3	| 2x2 stride,  outputs 7x7x100   				| Max pooling 1     | Flatten 1                   |
+| Flatten 1		| Input = 7x7x100, Output = 4900                | Max pooling 3     | Concatenate 1               |
+| Flatten 2		| Input = 5x5x200, Output = 5000                | Max pooling 2     | Concatenate 1               |
+| Concatenate 1 | Input1 = 4900, Input1 = 5000, Output = 9900   | Max pooling 2 and 3 |Fully connected            |
+| Fully connected | Fully Connected. Input = 9900, Output = 100 | Concatenate 1     | Softmax                     |
+| Softmax		| Fully Connected. Input = 100, Output = 43     | Fully connected   | Probabilities               |
+
+![alt text][image19]
+![alt text][image20]
 
 ####4. Describe how, and identify where in your code, you trained your model. The discussion can include the type of optimizer, the batch size, number of epochs and any hyperparameters such as learning rate.
 

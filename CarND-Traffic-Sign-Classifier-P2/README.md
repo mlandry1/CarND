@@ -278,9 +278,9 @@ To train the model, I used a batch size of 256, a maximum epochs number of 100 a
 The code for calculating the accuracy of the model is located in the ninth cell of the Ipython notebook.
 
 My final model results were:
-* Training set accuracy : 99.0%
-* Validation set accuracy : 98.0%
-* Test set accuracy : 94.9%
+* Training set accuracy : 99.6%
+* Validation set accuracy : 98.8%
+* Test set accuracy : 96.2%
 
 I choose the model from the suggested article. I believed it was revelant since a great name in the domain is on the paper (Yann Lecun). Plus their model is applied on exactly the same dataset as us. This paper also sets a new "test" accuracy reccord for the dataset and finaly Udacity suggested the article to its students so it must be a bit relevant! The model looks very much alike the original LeNet model but it uses an inovative connection that skips the second convolution layer to get directly to the fully connected layer.
 
@@ -319,7 +319,7 @@ Here are the results of the prediction:
 | 70 km/h	      		| 70 km/h		                |
 | No passing    		| No passing                    	|
 
-The model was able to correctly guess 5o f the 5 traffic signs, which gives an accuracy of 100%. This compares favorably to the accuracy on the test set (94.9%)..
+The model was able to correctly guess 5 of the 5 traffic signs, which gives an accuracy of 100%. This compares favorably to the accuracy on the test set (94.9%)..
 
 ####3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction and identify where in your code softmax probabilities were outputted. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
 

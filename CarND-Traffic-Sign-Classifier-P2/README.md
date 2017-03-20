@@ -208,8 +208,8 @@ My final model consisted of the following layers:
 | Flatten 1		| Input = 7x7x100, Output = 4900                | Max pooling 3     | Concatenate 1               |
 | Flatten 2		| Input = 5x5x200, Output = 5000                | Max pooling 2     | Concatenate 1               |
 | Concatenate 1 | Input1 = 4900, Input1 = 5000, Output = 9900   | Max pooling 2 and 3 |Fully connected            |
-| Fully connected | Fully Connected. Input = 9900, Output = 100 | Concatenate 1     | Softmax                     |
-| Softmax		| Fully Connected. Input = 100, Output = 43     | Fully connected   | Probabilities               |
+| Fully connected | Fully Connected. Input = 9900, Output = 100 | Concatenate 1     | Output                     |
+| Output		| Fully Connected. Input = 100, Output = 43     | Fully connected   | Logits               |
 
 ![alt text][image20]
 

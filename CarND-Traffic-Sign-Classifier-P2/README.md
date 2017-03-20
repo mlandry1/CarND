@@ -3,11 +3,6 @@
 [image1]: ./examples/visualization.jpg "Visualization"
 [image2]: ./examples/grayscale.jpg "Grayscaling"
 [image3]: ./examples/random_noise.jpg "Random Noise"
-[image4]: ./examples/bumpyroad.jpg "Bumpy Road Traffic Sign"
-[image5]: ./examples/Generalcaution.jpg "General Caution Traffic Sign"
-[image6]: ./examples/limit30.jpg "30kph Limit Traffic Sign"
-[image7]: ./examples/limit70.jpg "70kph Limit Traffic Sign"
-[image8]: ./examples/nopassing.jpg "No Passing Traffic Sign"
 [image9]: ./examples/tr.jpeg "Cover image"
 [image10]: ./examples/histogram_before.png "Histogram of the training dataset"
 [image11]: ./examples/Training_dataset_sample_before.png "Sample of the training dataset"
@@ -22,11 +17,35 @@
 [image20]: ./examples/architecture.png "My Conv Net Architecture"
 [image21]: ./examples/mean_variance.png "Input data mean and variance"
 [image22]: ./examples/web_images_classified.png "Web images classified"
-[image23]: ./examples/softmax_prob1.png "70kph sign top 5 predictions"
-[image24]: ./examples/softmax_prob2.png "30kph sign top 5 predictions"
-[image25]: ./examples/softmax_prob3.png "General Caution sign top 5 predictions"
-[image26]: ./examples/softmax_prob4.png "No Passing top 5 predictions"
-[image27]: ./examples/softmax_prob5.png "Bumpy  top 5 predictions"
+
+[image23]: ./examples/softmax_prob1.png "No passing sign top 5 predictions"
+[image24]: ./examples/softmax_prob2.png "Bumpy Road sign top 5 predictions"
+[image25]: ./examples/softmax_prob3.png "50kph sign top 5 predictions"
+[image26]: ./examples/softmax_prob4.png "General Caution sign top 5 predictions"
+[image27]: ./examples/softmax_prob5.png "30kph road sign top 5 predictions"
+[image35]: ./examples/softmax_prob6.png "No Entry sign top 5 predictions"
+[image36]: ./examples/softmax_prob7.png "70kph sign top 5 predictions"
+[image37]: ./examples/softmax_prob8.png "No Passing For Vehicles Over 3.5 metric Tons sign top 5 predictions"
+[image38]: ./examples/softmax_prob9.png "Keep right sign top 5 predictions"
+[image39]: ./examples/softmax_prob10.png "70kph sign top 5 predictions"
+[image40]: ./examples/softmax_prob11.png "70kph sign top 5 predictions"
+[image41]: ./examples/softmax_prob12.png "Slippery road sign top 5 predictions"
+
+
+[image4]: ./examples/Bigbumpyroad.jpg "Bumpy Road Traffic Sign"
+[image5]: ./examples/BigGeneralcaution.jpg "General Caution Traffic Sign"
+[image6]: ./examples/Biglimit30.jpg "30kph Limit Traffic Sign"
+[image7]: ./examples/Biglimit70.jpg "70kph Limit Traffic Sign"
+[image8]: ./examples/Bignopassing.jpg "No Passing Traffic Sign"
+
+[image28]: ./examples/Big50kph.jpg "50kph Limit Traffic Sign"
+[image29]: ./examples/Big70kphCovered.jpg "70kph Limit Traffic Sign"
+[image30]: ./examples/Big70kphSnow.jpg "70kph Limit Traffic Sign"
+[image31]: ./examples/BigKeepRight.jpg "Keep Right Traffic Sign"
+[image32]: ./examples/BigNoEntry.jpg "No Entry Traffic Sign"
+[image33]: ./examples/BigNoPassingForVehiclesOver3.5metricTons.jpg "No Passing For Vehicles Over 3.5 metric Tons Traffic Sign"
+[image34]: ./examples/BigSlipperyRoad.jpg "Slippery Road Traffic Sign"
+
 
 
 ## Traffic Sign Recognition Program
@@ -67,9 +86,9 @@ The goals / steps of this project are the following:
 
 Test results
 ---
-**Training accuracy** : 99.6%
-**Validation accuracy** : 98.8%
-**Test accuracy** : 96.2%
+**Training accuracy** : 100.0%
+**Validation accuracy** : 99.1%
+**Test accuracy** : 96.4%
 
 ## Rubric Points
 See the [Rubric Points](https://review.udacity.com/#!/rubrics/481/view)  for this project.
@@ -285,9 +304,9 @@ To train the model, I used a batch size of 256, a maximum epochs number of 100 a
 The code for calculating the accuracy of the model is located in the 15th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
 
 My final model results were:
-* Training set accuracy : 99.6%
-* Validation set accuracy : 98.8%
-* Test set accuracy : 96.2%
+* Training set accuracy : 100.0%
+* Validation set accuracy : 99.1%
+* Test set accuracy : 96.4%
 
 I choose the model from the suggested article. I believed it was revelant since a great name in the domain is on the paper (Yann Lecun). Plus their model is applied on exactly the same dataset as us. This paper also sets a new "test" accuracy reccord for the dataset and finaly Udacity suggested the article to its students so it must be a bit relevant! The model looks very much alike the original LeNet model but it uses an inovative connection that skips the second convolution layer to get directly to the fully connected layer.
 
@@ -299,8 +318,9 @@ I think my model's performance is correct without being outstanding. From the di
 
 Here are five German traffic signs that I found on the web:
 
-![alt text][image4] ![alt text][image5] ![alt text][image6] 
-![alt text][image7] ![alt text][image8]
+![alt text][image4] ![alt text][image5] ![alt text][image6] ![alt text][image7]
+![alt text][image8] ![alt text][image28] ![alt text][image29] ![alt text][image30]
+![alt text][image31] ![alt text][image32] ![alt text][image33] ![alt text][image34]
 
 The code to load these images is located in the 16th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
 
@@ -316,82 +336,30 @@ The 5th image (no passing) should be difficult to classify because of the waterm
 
 ####2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. Identify where in your code predictions were made. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
 
-The code for making predictions on my final model is located in the 17th cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
+The code for making predictions on my final model is located in the 17th and 18th cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
 
 Here are the results of the prediction:
-
-| Image	                         |     Prediction                         | 
-|:------------------------------:|:------------------------------------:| 
-| Bumpy road      		| Bumpy road   		        | 
-| General Caution		| General Caution	   		|
-| 30 km/h			| 30 km/h				|
-| 70 km/h	      		| 70 km/h		                |
-| No passing    		| No passing                    	|
-
 ![alt text][image22]
 
-The model was able to correctly guess 5 of the 5 traffic signs, which gives an accuracy of 100%. This compares favorably to the accuracy on the test set (96.2%)...
+The model was able to correctly guess 5 of the 5 traffic signs, which gives an accuracy of 66.7%. This compares favorably to the accuracy on the test set (96.4%)...
 
 ####3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction and identify where in your code softmax probabilities were outputted. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
 
-The code for making predictions on my final model is located in the 18th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
+The code for this softmax visulatisation is located in the 19th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb). 
 
-For the first image, the model is relatively sure that this is a 70kph sign (probability of 0.61). The top five soft max probabilities were
+For the 1rst image, the model is relatively sure that this is a 70kph sign (probability of 0.61). The top five soft max probabilities were
 
-| Probability         	|     Prediction	        		| 
-|:-----------------------:|:------------------------------------:| 
-| .61         		| Speed limit (70km/h)   	| 
-| .31    			| Speed limit (80km/h)	        |
-| .28				| Speed limit (20km/h)           |
-| .25	      			| Speed limit (30km/h)		|
-| .21				| Speed limit (120km/h) 	|
+For the 2nd image ...
 
-![alt text][image23]
-
-For the second image ... 
-
-| Probability         	|     Prediction	        		| 
-|:-----------------------:|:------------------------------------:| 
-| .44         		| Speed limit (30km/h)   	| 
-| .24     			| Speed limit (80km/h)	        |
-| .17				| Speed limit (20km/h)           |
-| .08	      			| Speed limit (70km/h)		|
-| .05				| Speed limit (50km/h) 		|
-
-![alt text][image24]
-
-For the third image ... 
-
-| Probability         	|     Prediction	        		| 
-|:-----------------------:|:------------------------------------:| 
-| .74         		| General caution		  	| 
-| .21     			| Traffic signals		        |
-| .07				| Pedestrians  		                |
-| -.10      			| Bumpy Road				|
-| -.12			| Road narrows on the right	|
-
-![alt text][image25]
-
-For the fourth image ... 
-
-| Probability         	|     Prediction	        		| 
-|:-----------------------:|:------------------------------------:| 
-| .28         		| No passing  			  	| 
-| .22     			| No passing for vehicles over 3.5 metric tons         |
-| .13				| Vehicles over 3.5 metric tons prohibited	           |
-| -.04      			| No vehicles				|
-| -.07			| Stop					|
-
-![alt text][image26]
-
-For the fifth image ... 
-
-| Probability         	|     Prediction	        		| 
-|:-----------------------:|:------------------------------------:| 
-| .91         		| Bumpy road 		         	| 
-| .14     			| Slippery road 		        |
-| .11				| Bicycles crossing		        |
-| -.05			| Road work			        |
-| -.12			| Turn left ahead      		|
-
-![alt text][image27]
+| ![alt text][image23] 	 |  ![alt text][image24]    	| 
+|:------------------------------:|:------------------------------------:| 
+| Yo					| Yo 						|
+| ![alt text][image25]      |  ![alt text][image26] 		|
+| Yo					| Yo 						|
+| ![alt text][image27] 	| ![alt text][image35] 		|
+| Yo					| Yo 						|
+| ![alt text][image36] 	| ![alt text][image37]		|
+| Yo					| Yo 						|
+| ![alt text][image38]	| ![alt text][image39]		|
+| Yo					| Yo 						|
+| ![alt text][image40]     | ![alt text][image41] 		|

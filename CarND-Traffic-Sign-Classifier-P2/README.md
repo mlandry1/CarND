@@ -77,11 +77,12 @@ I used the numpy library to calculate summary statistics of the traffic signs da
 
 The code for this step is contained in the third code cell of the  [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb).
 
-Here is an exploratory visualization of the data set. It is a bar chart showing how the training data is distributed accross the different classes.
+Here is an exploratory visualization of the data set. It is a bar chart showing how the training data is distributed accross the different classes:
 
 ![alt text][image10]
 
-And here is a sample of the training dataset.
+And here is a sample of the training dataset:
+
 ![alt text][image11]
 
 ### Design and Test a Model Architecture
@@ -255,7 +256,7 @@ The code for this softmax visualisation is located in the 19th code cell of the 
 | <img src=./examples/softmax_prob8.png> 
 |100% sure it is a "No passing for vehicles over 3.5 metric tons" sign, the 2nd possibility is the other "No passing" sign. |
 | <img src=./examples/softmax_prob9.png> 
-| Completly confused. The first possibility is hard to understand. But for the second possibility, it seems to confuse the light lines or the warning lines for the arrow of the "keep right" sign.	|
+| Completly confused. The first possibility is hard to understand. But for the second possibility, it guesses correctly that it is a "keep right" sign.	|
 | <img src=./examples/softmax_prob10.png> 		
 | 100% sure it is a "70kph" sign, other possibilities includes other "speed limit" signs. |
 | <img src=./examples/softmax_prob11.png>  

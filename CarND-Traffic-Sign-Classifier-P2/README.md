@@ -9,8 +9,8 @@
 [image12]: ./examples/histogram_after.png "Histogram of the training dataset after augmentation"
 [image13]: ./examples/AugmentedDataset.png "Sample of the dataset after augmentation"
 [image14]: ./examples/0_preprocess_original.png "Original sample"
-[image15]: ./examples/1_preprocess_equalize_histogram.png "Sample after Y histogram equalization"
-[image16]: ./examples/2_preprocess_grayscale.png "Sample after the grayscale conversion"
+[image15]: ./examples/1_preprocess_grayscale.png "Sample after the grayscale conversion"
+[image16]: ./examples/2_CLAHE_normalization.png "Sample after the CLAHE contrast normalization"
 [image17]: ./examples/3_preprocess_grayscale.png "Image values after the grayscale conversion"
 [image18]: ./examples/4_preprocess_normalize.png "Image values after the normalization"
 [image19]: ./examples/ConvNet.png "Pierre Sermanet's and Yann LeCun's Conv Net Architecture"
@@ -51,9 +51,9 @@ The goals / steps of this project are the following:
 
 Test results
 ---
-* **Training accuracy**   : 100.0%
-* **Validation accuracy** : 99.1%
-* **Test accuracy**       : 96.4%
+* **Training accuracy**   : 99.9%
+* **Validation accuracy** : 98.9%
+* **Test accuracy**       : 97.2%
 
 ## Rubric Points
 See the [Rubric Points](https://review.udacity.com/#!/rubrics/481/view)  for this project.
@@ -91,22 +91,36 @@ And here is a sample of the training dataset:
 
 The code for this step is contained in the 6th, 7th and 8th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb).
 
-In order to do my data preprocessing, I inspired myself from the work presented in the suggested [article](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf)
+In order to do my data preprocessing, I inspired myself both from the work presented in this [article](http://people.idsia.ch/~juergen/ijcnn2011.pdf) entitled : "A Committee of Neural Networks for Traffic Sign Classification" and from the suggested [article](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) from Pierre Sermanet and Yann LeCun. 
+
+Both papers refers ot the exact same problem we are dealing with i.e.: traffic sign classifying on the GTSRB. 
+
+The former paper is a bit more explicit on its data preprocessing techniques. In their "Data-preprocessing" section they confirm my own insight, in their own words:
+
+> High contrast variation among the images calls for contrast normalization.
+
+In order to do so, they test 3 differents type of normalization : 
+
+> 1. Pixels of all three color channels are linearly scaled to plus-minus one standard deviation around the average pixel intensity;
+> 2. Pixels of all three color channels are linearly scaled to plus-minus two standard deviations around the average pixel intensity;
+> 3. Contrast-limited Adaptive Histogram Equalization (CLAHE).
+
+Their conclusion is pretty clear:
+
+> From all tried normalization methods, CLAHE yields the best result.
+
+However, unlike the result found in Semanet's paper they conclude that the color implementation of their network yields the lowest error rate on their test set.
+
+As stated further down, I used the Semanet's paper network architecture. Therefore, I decided to stick with grayscaled images in my preprocessing pipeline.
 
 Here is the original image we will be studying as an example:
 ![alt text][image14]
 
-As a first step, I would like to improve the contrast on the original image. As sugested in the article, I go through the following steps:
-
-* Convert the image to the YUV space using *cv2.cvtColor*
-* Equalize the Y channel histogram using *cv2.equalizeHist*.  I leave the U and V channels intacts.
-* Convert back the image to RGB using *cv2.cvtColor* once again.
-
-The process yields the following contrast improved image:
+As a first step, I convert the image to the grayscale space, using *cv2.cvtColor*:
 
 ![alt text][image15]
 
-In the article it is suggested that converting the images to grayscale further improve the network classification accuracy, so I decided to go for it as well:
+I then create an openCV CLAHE object via : *cv2.createCLAHE* and call its *apply* method on the above grayscale image. The process yields the following contrast enhanced image:
 
 ![alt text][image16]
 
@@ -114,7 +128,7 @@ As a last step, I normalized the image data in order to keep numerical stability
 
 ![alt text][image21]
 
-On top of numerical stability, a well conditionned problem makes it a lot easier for the optimizer to do its job. In this lesson, Vincent also suggest that it is possible to normalize image data to get a zero mean. However in the TensorFlow introduction Lab at the end of lesson 6 we learned to do a min-max normalization on a grayscale image which yeilds a 0.5 mean value. I chose this last method since I had hands-on expericence with it and it preserves the ability to accurately show the image within a *matplotlib* figure.
+On top of numerical stability, a well conditionned problem makes it a lot easier for the optimizer to do its job. In this lesson, Vincent also suggests that it is possible to normalize image data to get a zero mean. However in the TensorFlow introduction Lab at the end of lesson 6 we learned to do a min-max normalization on a grayscale image which yeilds a 0.5 mean value. I chose this last method since I had hands-on expericence with it and it preserves the ability to accurately show the image within a *matplotlib* figure.
 
 Here are the values of the previous grayscale image before normalization:
 
@@ -198,9 +212,9 @@ To train the model, I used a batch size of 256, a maximum epochs number of 100 a
 The code for calculating the accuracy of the model is located in the 15th code cell of the [IPython notebook](https://github.com/mlandry1/CarND/blob/master/CarND-Traffic-Sign-Classifier-P2/Traffic_Sign_Classifier.ipynb).
 
 My final model results were:
-* Training set accuracy : 100.0%
-* Validation set accuracy : 99.1%
-* Test set accuracy : 96.4%
+* Training set accuracy : 99.9%
+* Validation set accuracy : 98.9%
+* Test set accuracy : 97.2%
 
 I choose the model from the suggested article. I believed it was revelant since a great name in the domain is on the paper (Yann Lecun). Plus their model is applied on exactly the same dataset as us. This paper also sets a new "test" accuracy reccord for the dataset and finaly Udacity suggested the article to its students so it must be a bit relevant! The model looks very much alike the original LeNet model but it uses an inovative connection that skips the second convolution layer to get directly to the fully connected layer.
 

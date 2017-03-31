@@ -1,0 +1,20 @@
+se maintenir en bas de 28596 items..
+
+model1.h5
+PAS BON sur les 2 tracks
+	data-Normal Drive Forward Track 1 - small
+	data-Normal Drive Forward Track 2
+	data-Recovery FWD-REV Track 1
+
+	epochs = 3
+	train loss = 0.0116
+	validation loss = 0.0386
+
+model2.h5
+
+	data-Normal Drive Forward Track 1 - Big
+	data-Normal Drive Forward Track 2
+
+	epochs = 3
+	train loss =
+	validation loss =

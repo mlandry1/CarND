@@ -3,6 +3,7 @@ import base64
 from datetime import datetime
 import os
 import shutil
+import cv2
 
 import numpy as np
 import socketio
@@ -40,12 +41,26 @@ class SimplePIController:
         # integral error
         self.integral += self.error
 
+        # Anti-wind up
+        if (self.Kp * self.error + self.Ki * self.integral) >= 30:
+            self.integral = (30 - self.Kp * self.error)/self.Ki
+
         return self.Kp * self.error + self.Ki * self.integral
 
 
 controller = SimplePIController(0.1, 0.002)
-set_speed = 9
+set_speed = 18
 controller.set_desired(set_speed)
+
+
+def image_preprocessing(image):
+    # # Reduce image size by 2  (320x160) -> (160x80)
+    image = cv2.resize(image, (0, 0), fx=0.5, fy=0.5)
+
+    # Apply a slight Gaussian blur
+    image = cv2.GaussianBlur(image, (3, 3), 0)
+
+    return image
 
 
 @sio.on('telemetry')
@@ -60,7 +75,8 @@ def telemetry(sid, data):
         # The current image from the center camera of the car
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
-        image_array = np.asarray(image)
+        image_pre = np.asarray(image)
+        image_array = image_preprocessing(image_pre)
         steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
 
         throttle = controller.update(float(speed))

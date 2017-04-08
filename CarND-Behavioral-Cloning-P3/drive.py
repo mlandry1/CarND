@@ -49,12 +49,12 @@ class SimplePIController:
 
 
 controller = SimplePIController(0.1, 0.002)
-set_speed = 18
+set_speed = 30
 controller.set_desired(set_speed)
 
 
 def image_preprocessing(image):
-    # # Reduce image size by 2  (320x160) -> (160x80)
+    # Reduce image size by 2  (320x160) -> (160x80)
     image = cv2.resize(image, (0, 0), fx=0.5, fy=0.5)
 
     # Apply a slight Gaussian blur

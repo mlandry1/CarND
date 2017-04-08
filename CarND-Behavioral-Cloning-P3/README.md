@@ -1,29 +1,3 @@
-[//]: # (Image References)
-
-[image1]: ./examples/center_lane_driving.png "Center lane driving - Track 1"
-[image2]: ./examples/center_lane_driving2.png "Center lane driving - Track 2"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
-
-
-[image8]: ./examples/generated_figures/figure1.png "Non augmented/steering angles values"
-[image9]: ./examples/generated_figures/figure2.png "Non augmented/filtered speed values"
-[image10]: ./examples/generated_figures/figure3.png "Histogram of original dataset steering angles values"
-[image11]: ./examples/generated_figures/figure4.png "Histogram of original dataset speed values"
-[image12]: ./examples/generated_figures/figure5.png "Filtered angles values"
-[image13]: ./examples/generated_figures/figure6.png "Filtered speed values"
-[image14]: ./examples/generated_figures/figure7.png "Histogram of filtered steering angles values"
-[image15]: ./examples/generated_figures/figure8.png "Histogram of filtered speed values"
-[image16]: ./examples/generated_figures/figure9.png "Preprocessed and resized, left, center and right camera view"
-[image17]: ./examples/generated_figures/figure10.png "Augmented and flipped images generated from 1 time stamp"
-[image18]: ./examples/generated_figures/figure11.png "Histogram of filtered/augmented/flipped steering angles"
-[image19]: ./examples/generated_figures/model_loss_vs_epoch.png "Model mean squared error vs epoch"
-[image20]: ./examples/ModelArchitecture.png "Model architecture"
-
-
 ##Use Deep Learning to Clone Driving Behavior
 [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
@@ -41,7 +15,7 @@ The goals / steps of this project are the following:
 5. Summarize the results with a written report
 
 ## Rubric Points
- Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
+ Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation. 
 
 ---
 ### Files Submitted & Code Quality
@@ -53,12 +27,14 @@ My project includes the following files:
 * drive.py for driving the car in autonomous mode
 * model.h5 containing a trained convolution neural network 
 * readme.md summarizing the results
+* video.mp4 showing 1 lap around track 1 @30mph and 1 lap around track 2 @ 20mph.
 
 #### 2. Submission includes functional code
-Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around both tracks at 20mph by executing 
+Using the Udacity provided simulator and my *drive.py* file, the car can be driven autonomously around both tracks at 20mph by executing 
 ```sh
 python drive.py model.h5
 ```
+It is also possible to drive arround track 1 @30mph, if you modify *drive.py* accordingly.
 
 #### 3. Submission code is usable and readable
 
@@ -94,9 +70,7 @@ The fact that the vehicle can stay on both tracks is sort of an indicator of the
 
 #### 3. Model parameter tuning
 
-The model used an Adam optimizer so I kept the base learning rate (1e-3) (model.py lines 20 and 486). A learning rate decay of 1e-7 was applied to get a better convergence.
-
-https://arxiv.org/pdf/1412.6980.pdf
+The model used an [Adam optimizer](https://arxiv.org/pdf/1412.6980.pdf) so I kept the base learning rate (1e-3) (model.py lines 20 and 486). A learning rate decay of 1e-7 was applied to get a better convergence.
 
 #### 4. Appropriate training data
 
@@ -171,32 +145,49 @@ _________________________________________________________________
 ```
 Here is a visualization of the architecture:
 
-![alt text][image20]
+<img src=./examples/ModelArchitecture.png width="1200">
 
 #### 3. Creation of the Training Set & Training Process
 
-To capture good driving behavior, I first concentrated on center lane driving. I first recorded 1 lap on track one going in the normal direction then I recorded another lap going in the opposite direction. I did the same on track 2.  I used the mouse to control the steering angle and the keyboard for the throttle. I did not pay to much attention at keeping the speed constant throughout the laps.
+To capture good driving behavior, I first concentrated on center lane driving. I first recorded 1 lap on track 1 going in the normal direction then I recorded another lap going in the opposite direction. I repeated the same process on track 2 in order to get more data points.  I used the mouse to control the steering angle and the keyboard for the throttle. I did not pay to much attention at keeping the speed constant throughout the laps.
 
 Here's an two examples of center lane driving:
 
-![alt text][image1]
-![alt text][image2]
+##### Track 1:
+<img src=./examples/center_lane_driving.png  width="1200">
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to come back to the center of the lane. These images show what a recovery looks like starting from ... :
+##### Track 2:
+<img src=./examples/center_lane_driving2.png  width="1200">|
 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to come back to the center of the lane. 
 
-During training, I noticed that I was suceptible to choose sharper recovery angles if I was driving at lower speed. I believe this is a natural driving reflex based on reaction and actuating time. Since I don't want my model to start oscillating from one edge of the road the other, I decided to remove the images and steering angles that have been recorded at speeds lower than 10mph (model.py line 342 ). 
+These images show what a recovery looks like :
+
+##### Track 1:
+|Step| Image|
+|:----:|:---:|
+| 1 |<img src=./examples/recoverytrack1step1.png  width="1200">|
+| 2 |<img src=./examples/recoverytrack1step2.png  width="1200">|
+| 3 |<img src=./examples/recoverytrack1step3.png  width="1200">|
+
+##### Track 2:
+|Step| Image|
+|:----:|:---:|
+| 1 |<img src=./examples/recoverytrack2step1.png  width="1200">|
+| 2 |<img src=./examples/recoverytrack2step2.png  width="1200">|
+| 3 |<img src=./examples/recoverytrack2step3.png  width="1200">|
+
+During training, I noticed that I was suceptible to choose sharper recovery angles if I was driving at lower speed. I believe this is a natural driving reflex based on reaction and actuating time. Since I don't want my model to start oscillating from one edge of the road the other, I decided to remove the images and steering angles that have been recorded at speeds below 10mph (model.py line 342 ). 
 
 
-Then I repeated this process on track two in order to get more data points.
+To augment the data set, I also flipped images and angles thinking that this would cancel the steering angle occurence bias as we can see in the following images:
+<img src=./examples/histo_before_flip.png  width="1000">
+<img src=./examples/histo_after_flip.png  width="1000">
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+For example, here is an image that has then been flipped:
 
-![alt text][image6]
-![alt text][image7]
+
+
 
 Etc ....
 
@@ -208,127 +199,17 @@ I finally randomly shuffled the data set and put Y% of the data into a validatio
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
 
 
-# inclure un lien vers le simulateur
+<img src=./examples/model_loss_vs_epoch.png  width="1000">
 
+Best epoch is #3.. with val_loss =0.0084 and train_loss= 0.0055.
+ Reload the 
 
-# Behaviorial Cloning Project
+parler de la procédure de loader les weight et sauvegarder le model (j'en parle plus haut.. dans overfitting avoindance..)
 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+### parler des left out ideas.. voir le writuptemplate ou une vieille version du github..
+### montrer le graph de epoch 
 
-Overview
----
-This repository contains starting files for the Behavioral Cloning Project.
+Click on images below to see the full-length YouTube videos..
 
-In this project, you will use what you've learned about deep neural networks and convolutional neural networks to clone driving behavior. You will train, validate and test a model using Keras. The model will output a steering angle to an autonomous vehicle.
-
-We have provided a simulator where you can steer a car around a track for data collection. You'll use image data and steering angles to train a neural network and then use this model to drive the car autonomously around the track.
-
-We also want you to create a detailed writeup of the project. Check out the [writeup template](https://github.com/udacity/CarND-Behavioral-Cloning-P3/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup. The writeup can be either a markdown file or a pdf document.
-
-To meet specifications, the project will require submitting five files: 
-* model.py (script used to create and train the model)
-* drive.py (script to drive the car - feel free to modify this file)
-* model.h5 (a trained Keras model)
-* a report writeup file (either markdown or pdf)
-* video.mp4 (a video recording of your vehicle driving autonomously around the track for at least one full lap)
-
-This README file describes how to output the video in the "Details About Files In This Directory" section.
-
-Creating a Great Writeup
----
-A great writeup should include the [rubric points](https://review.udacity.com/#!/rubrics/432/view) as well as your description of how you addressed each point.  You should include a detailed description of the code used (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
-
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
-
-The Project
----
-The goals / steps of this project are the following:
-* Use the simulator to collect data of good driving behavior 
-* Design, train and validate a model that predicts a steering angle from image data
-* Use the model to drive the vehicle autonomously around the first track in the simulator. The vehicle should remain on the road for an entire loop around the track.
-* Summarize the results with a written report
-
-### Dependencies
-This lab requires:
-
-* [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit)
-
-The lab enviroment can be created with CarND Term1 Starter Kit. Click [here](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) for the details.
-
-The following resources can be found in this github repository:
-* drive.py
-* video.py
-* writeup_template.md
-
-The simulator can be downloaded from the classroom. In the classroom, we have also provided sample data that you can optionally use to help train your model.
-
-## Details About Files In This Directory
-
-### `drive.py`
-
-Usage of `drive.py` requires you have saved the trained model as an h5 file, i.e. `model.h5`. See the [Keras documentation](https://keras.io/getting-started/faq/#how-can-i-save-a-keras-model) for how to create this file using the following command:
-```sh
-model.save(filepath)
-```
-
-Once the model has been saved, it can be used with drive.py using this command:
-
-```sh
-python drive.py model.h5
-```
-
-The above command will load the trained model and use the model to make predictions on individual images in real-time and send the predicted angle back to the server via a websocket connection.
-
-Note: There is known local system's setting issue with replacing "," with "." when using drive.py. When this happens it can make predicted steering values clipped to max/min values. If this occurs, a known fix for this is to add "export LANG=en_US.utf8" to the bashrc file.
-
-#### Saving a video of the autonomous agent
-
-```sh
-python drive.py model.h5 run1
-```
-
-The fourth argument `run1` is the directory to save the images seen by the agent to. If the directory already exists it'll be overwritten.
-
-```sh
-ls run1
-
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_424.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_451.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_477.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_528.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_573.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_618.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_697.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_723.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_749.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_817.jpg
-...
-```
-
-The image file name is a timestamp when the image image was seen. This information is used by `video.py` to create a chronological video of the agent driving.
-
-### `video.py`
-
-```sh
-python video.py run1
-```
-
-Create a video based on images found in the `run1` directory. The name of the video will be name of the directory following by `'.mp4'`, so, in this case the video will be `run1.mp4`.
-
-Optionally one can specify the FPS (frames per second) of the video:
-
-```sh
-python video.py run1 --fps 48
-```
-
-The video will run at 48 FPS. The default FPS is 60.
-
-#### Why create a video
-
-1. It's been noted the simulator might perform differently based on the hardware. So if your model drives succesfully on your machine it might not on another machine (your reviewer). Saving a video is a solid backup in case this happens.
-2. You could slightly alter the code in `drive.py` and/or `video.py` to create a video of what your model sees after the image is processed (may be helpful for debugging).
-
-
+[![30mph driving arround Track 1](./examples/giphy-track1.gif)](https://youtu.be/Ul6jH5K0HVA) [![20mph driving arround Track 2](./examples/giphy-track2.gif)](https://youtu.be/pdipLkbhiq4)
 

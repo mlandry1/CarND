@@ -16,7 +16,7 @@ flags = tf.app.flags
 FLAGS = flags.FLAGS
 
 flags.DEFINE_integer('batch_size', 32, 'batch size.')
-flags.DEFINE_integer('num_epochs', 4, 'The number of epochs to train for.')
+flags.DEFINE_integer('num_epochs', 6, 'The number of epochs to train for.')
 flags.DEFINE_float('lrate', 1e-3, 'The learning rate for training.')
 flags.DEFINE_float('lratedecay', 1e-7, 'Learning rate decay over each epoch')
 
@@ -480,7 +480,9 @@ def main(_):
     model = get_model()
 
     # # load weights
-    # model.load_weights('/tmp/best-weights.hdf5')
+    # model.load_weights('./tmp/best-weights.hdf5')
+    # model.save('model_best.h5')
+    # print("Model saved!")
 
     # Compile and train the model
     model.compile(optimizer=Adam(lr=FLAGS.lrate, decay=FLAGS.lratedecay), loss='mse')
@@ -497,16 +499,6 @@ def main(_):
         callbacks=[checkpointer],
         validation_data=validation_generator,
         validation_steps=len(validation_samples))
-
-    # # TODO: test remove
-    # history_object = model.fit_generator(
-    #     train_generator,
-    #     steps_per_epoch=4,
-    #     epochs=5,
-    #     verbose=1,
-    #     callbacks=[checkpointer],
-    #     validation_data=validation_generator,
-    #     validation_steps=2)
 
     # Save the model
     model.save('model.h5')

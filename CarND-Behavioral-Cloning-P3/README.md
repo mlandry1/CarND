@@ -23,12 +23,12 @@ The goals / steps of this project are the following:
 #### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
 
 My project includes the following files:
-* model.py containing the script to create and train the model
-* drive.py for driving the car in autonomous mode
-* model.h5 containing a trained convolution neural network 
-* README.md summarizing the results
-* video.mp4 showing 1 lap around track 1 @30mph and 1 lap around track 2 @ 20mph.
-* video.py python script used to create video.mp4
+* *model.py* containing the script to create and train the model
+* *drive.py* for driving the car in autonomous mode
+* *model.h5* containing a trained convolution neural network 
+* *README.md* summarizing the results
+* *video.mp4* showing 1 lap around track 1 @30mph and 1 lap around track 2 @ 20mph.
+* *video.py* python script used to create video.mp4
 
 #### 2. Submission includes functional code
 Using the Udacity provided simulator and my *drive.py* file, the car can be driven autonomously around both tracks at 20mph by executing 
@@ -39,13 +39,13 @@ It is also possible to drive arround track 1 @30mph, if you modify *drive.py* ac
 
 #### 3. Submission code is usable and readable
 
-The model.py file contains the code for training and saving the convolution neural network (lines 477-502). The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+The *model.py* file contains the code for training and saving the convolution neural network (lines 477-502). The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
 
 ### Model Architecture and Training Strategy
 
 #### 1. An appropriate model architecture has been employed
 
-My model is based on NVIDIA's [end to end learning article](https://arxiv.org/pdf/1604.07316.pdf). The network consists of 9 layers, including a normalization layer, 5 convolutional layers and 3 fully connected layers. (model.py lines 403-424). 
+My model is based on NVIDIA's [end to end learning article](https://arxiv.org/pdf/1604.07316.pdf). The network consists of 9 layers, including a normalization layer, 5 convolutional layers and 3 fully connected layers. (*model.py* lines 403-424). 
 
 According to the [article](https://arxiv.org/pdf/1604.07316.pdf) (p.4): 
 > The convolutional layers were designed to perform feature extraction and were chosen empirically through a series of experiments that varied layer configurations.
@@ -53,17 +53,17 @@ According to the [article](https://arxiv.org/pdf/1604.07316.pdf) (p.4):
 Further down they explain:
 > [They] follow the five convolutional layers with three fully connected layers leading to an output control value which is the inverse turning radius. The fully connected layers are designed to function as a controller for steering, but [they] note that by training the system end-to-end, it is not possible to make a clean break between which parts of the network function primarily as feature extractor and which serve as controller.
 
-I decided to include ELU layers to introduce nonlinearity (model.py lines 403-422). [This  article](http://www.picalike.com/blog/2015/11/28/relu-was-yesterday-tomorrow-comes-elu/) points out the advantages of ELUs over RELUs. This activation function among other things can make learning faster.
+I decided to include ELU layers to introduce nonlinearity (*model.py* lines 403-422). [This  article](http://www.picalike.com/blog/2015/11/28/relu-was-yesterday-tomorrow-comes-elu/) points out the advantages of ELUs over RELUs. This activation function among other things can make learning faster.
 
-The input data consists of the RGB channels of the image. NVIDIA's article uses YUV channels but RGB were more convenient since it prevented me from modifying drive.py, but I ended up modifying it anyway for other reasons stated below. The input image is then normalized and cropped in the model using a Keras lambda layer (model.py line 396) and a Keras Cropping2D layer (model.py line 399).
+The input data consists of the RGB channels of the image. NVIDIA's article uses YUV channels but RGB were more convenient since it prevented me from modifying *drive.py*, but I ended up modifying it anyway for other reasons stated below. The input image is then normalized and cropped in the model using a Keras lambda layer (*model.py* line 396) and a Keras Cropping2D layer (*model.py* line 399).
 
-In order to reduce training time, I've also been able to resize the input image to 50% of its original dimensions without noticeable accuracy loss. To accommodate the new input size of the model, I had to modify drive.py (lines 58-65 and 80-81) to apply a cv2.resize on the images yeilded by the simulator.
+In order to reduce training time, I've also been able to resize the input image to 50% of its original dimensions without noticeable accuracy loss. To accommodate the new input size of the model, I had to modify *drive.py* (lines 56-63 and 79) to apply a *cv2.resize* on the images yeilded by the simulator.
 
 #### 2. Attempts to reduce overfitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 412-416-420). The dropout function in Keras takes in the drop probability as opposed to the one in tensorflow which take in the keep probability.
+The model contains dropout layers in order to reduce overfitting (*model.py* lines 412-416-420). The dropout function in Keras takes in the drop probability as opposed to the one in tensorflow which take in the keep probability.
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (model.py line 380 and 475). The test portion was executed by running the model with the simulator.
+The model was trained and validated on different data sets to ensure that the model was not overfitting (*model.py* line 380 and 474-475). The test portion was executed by running the model with the simulator.
 
 The validation loss was monitored at then end of each epoch and the weights that yeilded the lowest validation loss were saved along the way. Those weights can then be restored and embeded into a model usable to drive the simulator. 
 
@@ -71,7 +71,7 @@ The fact that the vehicle can stay on both tracks is sort of an indicator of the
 
 #### 3. Model parameter tuning
 
-The model used an [Adam optimizer](https://arxiv.org/pdf/1412.6980.pdf) so I kept the base learning rate (1e-3) (model.py lines 20 and 486). A learning rate decay of 1e-7 was applied to get a better convergence.
+The model used an [Adam optimizer](https://arxiv.org/pdf/1412.6980.pdf) so I kept the base learning rate (1e-3) (*model.py* lines 20 and 488). A learning rate decay of 1e-7 was applied to get a better convergence.
 
 #### 4. Appropriate training data
 
@@ -83,7 +83,7 @@ For details about how I created the training data, see the next section.
 
 #### 1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to look for papers that contained architecture examples.
+The overall strategy for deriving a model architecture was to look for papers that contained architecture examples applied on a similar problem.
 
 My first step was to use a convolution neural network model similar to the in NVIDIA's [end to end learning paper](https://arxiv.org/pdf/1604.07316.pdf) and comma.ai's [Learning a Driving Simulator paper](https://arxiv.org/pdf/1608.01230.pdf). I thought this model might be appropriate because both companies are running real-life succesfull autonomous cars. Plus those papers are solving exactly the same problem as I am trying to.
 
@@ -94,16 +94,14 @@ To combat the overfitting, I modified the model to include dropout layers after 
 The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track. 
 To improve the driving behavior in these cases, I did several things:
 * I recorded more training examples and more recovery manoeuvers.
-* I flipped the images and the steering angle to remove any bias in the steering angle data (model.py lines 88-89)
-* I used all three cameras images by adding an offset (0.25 or 6.25&deg;) to the steering angle for the right and left cameras (model.py lines 143-145).
-* I generated synthetic images by doing a brigthness randomisation and a vertical and horizontal perspective shift (model.py lines 81-85).
-* I also filtered the data based on vehicle speed to remove steering angles suceptible to be too sharp.
-
-At the end of the process, the vehicle is able to drive autonomously around both tracks without leaving the road.
+* I flipped the images and the steering angle to remove any bias in the steering angle data (*model.py* lines 88-89)
+* I used all three cameras images by adding an offset (0.25 or 6.25&deg;) to the steering angle for the right and left cameras (*model.py* lines 143-145).
+* I generated synthetic images by doing a brigthness randomisation and a vertical and horizontal perspective shift (*model.py* lines 81-85).
+* I also filtered the data based on vehicle speed to remove steering angles suceptible to be too sharp (*model.py* lines 119-130).
 
 #### 2. Final Model Architecture
 
-The final model architecture (model.py lines 396-424) consisted of a convolution neural network with the following layers and layer sizes:
+The final model architecture (*model.py* lines 396-424) consisted of a convolution neural network with the following layers and layer sizes:
 
 ```sh
 _________________________________________________________________
@@ -178,7 +176,7 @@ These images show what a recovery looks like :
 | 2 |<img src=./examples/recoverytrack2step2.png  width="1200">|
 | 3 |<img src=./examples/recoverytrack2step3.png  width="1200">|
 
-During training, I noticed that I was suceptible to choose sharper recovery angles if I was driving at lower speed. I believe this is a natural driving reflex based on reaction and actuating time. Since I didn't want my model to start oscillating from one edge of the road to the other, I decided to remove the images and steering angles that have been recorded at speeds below 10mph (model.py line 342 ). 
+During training, I noticed that I was suceptible to choose sharper recovery angles if I was driving at lower speed. I believe this is a natural driving reflex based on reaction and actuating time. Since I didn't want my model to start oscillating from one edge of the road to the other, I decided to remove the images and steering angles that have been recorded at speeds below 10mph (*model.py* line 119-130 and 342). 
 
 To augment the data set, I also flipped images and angles thinking that this would cancel the steering angle occurence bias as we can see in the following images:
 <img src=./examples/histo_before_flip.png  width="1000">
@@ -187,7 +185,7 @@ To augment the data set, I also flipped images and angles thinking that this wou
 For example, here is an example of an image set that has been flipped:
 <img src=./examples/flipped_example.png  width="1000">
 
-To further augment the dataset and help the model generalize, I decided to implement a jittering function : *data_augmentation* (model.py lines 37-51). This function consists of a randomized brightness adjustment, a randomized horizon shift and a randomized lateral perspective shift. The horizon shift is meant to help the model to generalize in hilly conditions and thus perform better on track #2. The lateral shift, for its part, is meant to provide a greater variety of steering angle/image examples in order to help the network generalize. Points were chosen on the image (see figure below), and are then shifted to give a whole new perspective (model.py lines 74-83). A transfert function was then determined empiricaly to augment the steering angles as well (model.py line 104).
+To further augment the dataset and help the model generalize, I decided to implement a jittering function : *data_augmentation* (*model.py* lines 37-51). This function consists of a randomized brightness adjustment, a randomized horizon shift and a randomized lateral perspective shift. The horizon shift is meant to help the model to generalize in hilly conditions and thus perform better on track #2. The lateral shift, for its part, is meant to provide a greater variety of steering angle/image examples in order to help the network generalize. Points were chosen on the image (see figure below), and are then shifted to give a whole new perspective (*model.py* lines 74-83). A transfert function was then determined empiricaly to augment the steering angles as well (*model.py* line 104).
 
 Here are the points chosen for the perspective shift:
 
@@ -202,23 +200,23 @@ These random transforms are applied on images from all three dashboard cameras t
 After the whole process, I had 65904 training sample and 28248 validation samples. 
 
 I then preprocessed this data using these steps:
-* convert the color map from BGR to RGB (model.py line 26)
-* resize the image to the model's expected input image size (model.py line 29)
-* apply a slight gaussian blur to smooth out artifacts (model.py line 32)
+* convert the color map from BGR to RGB (*model.py* line 26)
+* resize the image to the model's expected input image size (*model.py* line 29)
+* apply a slight gaussian blur to smooth out artifacts (*model.py* line 32)
 
 The color map conversion is required since the cv2.imread() function used to load the data for training outputs BGR images but the simulator for its part outputs RGB images. 
 
 The whole process of augmenting, flipping and preprocessing both the training and the validation dataset is done using a Keras generator. This allows me to run this process on mini-batches with the CPU while the GPU is backpropagating the model without having to preload the entire dataset into the memory. 
 
-The final step is to randomly shuffle the mini-batches data before yielding it to the fit_generator() function (model.py line 448).
+The final step is to randomly shuffle the mini-batches data before yielding it to the *fit_generator* function (*model.py* line 466).
 
-The validation set and training set seperation is done before the data enters the Keras generator. Indeed, I initially randomly shuffle the data set and put 30% of the data into a validation set (model.py line 362)
+The validation set and training set seperation is done before the data enters the Keras generator. Indeed, I initially randomly shuffle the data set and put 30% of the data into a validation set (*model.py* line 380)
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 3 as evidenced by the fact that after the third epoch the validation loss started to go up again (see the graphic below). My final model had a validation loss of 0.0084 and a training loss of 0.0055.  I used an adam optimizer so that manually choising the learning rate wasn't necessary. I also used a learning rate decay of 1e-7 to try to get a better final solution (model.py line ).
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 3 as evidenced by the fact that after the third epoch the validation loss started to go up again (see the graphic below). My final model had a validation loss of 0.0084 and a training loss of 0.0055.  I used an adam optimizer so that manually choising the learning rate wasn't necessary. I also used a learning rate decay of 1e-7 to try to get a better final solution (*model.py* lines 488 and 21).
 
 <img src=./examples/model_loss_vs_epoch.png  width="1000">
 
-To make sure I wasn't going to end up with an over or underfitted model , I used Keras's ModelCheckpoint callback (model.py line 472). This callback is executed after each epoch. It was configured to save the weights only when the current epoch validation loss is the lowest up to this point in the training process.
+To make sure I wasn't going to end up with an over or underfitted model , I used Keras's ModelCheckpoint callback (*model.py* line 492). This callback is executed after each epoch. It was configured to save the weights only when the current epoch validation loss is the lowest up to this point in the training process.
 
 ## Results
 

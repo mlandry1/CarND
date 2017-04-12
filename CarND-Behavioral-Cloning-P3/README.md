@@ -152,15 +152,15 @@ To capture good driving behavior, I first concentrated on center lane driving. I
 
 Here's an two examples of center lane driving:
 
-##### Recovery maneuver on track 1:
+##### Track 1:
 <img src=./examples/center_lane_driving.png  width="1200">
 
-##### Recovery maneuver on track 2:
+##### Track 2:
 <img src=./examples/center_lane_driving2.png  width="1200">
 
 I then recorded the vehicle recovering from the left and right sides of the road back to the center in order to teach the network to recover if ever the car was too far off on one side of the road. 
 
-These images show what a recovery looks like :
+These images show what a recovery maneuver looks like :
 
 ##### Track 1:
 |Step| Image|

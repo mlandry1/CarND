@@ -7,6 +7,7 @@ Recommended order for exploring these projects is as follows:
 - Finding Lane Lines on the Road - P1
 - Build a Traffic Sign Recognition Classifier - P2
 - Behavioral Clonning (end to end deep learning self-driving) - P3
+- Advanced Lane Line Finding - P4
 
 ## About this Course
 

@@ -13,9 +13,9 @@ The goals / steps of this project are the following:
 3. Use color transforms, gradients, etc., to create a thresholded binary image.
 4. Apply a perspective transform to rectify binary image ("birds-eye view").
 5. Detect lane pixels and fit to find the lane boundary.
-* Determine the curvature of the lane and vehicle position with respect to center.
-6. Warp the detected lane boundaries back onto the original image.
-7. Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+6. Determine the curvature of the lane and vehicle position with respect to center.
+7. Warp the detected lane boundaries back onto the original image.
+8. Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
 ## Rubric Points
  Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/571/view) individually and describe how I addressed each point in my implementation. 
@@ -263,7 +263,7 @@ The steps are divided as follows:
 4. Sobel filtering: to identify edges. I first apply Contrast Limited Adaptive Histogram Equalization on the luminance channel of the HLS in order to improve contrast. Since at this point the image is already perspective transformed, the lane lines are thus mostly vertical. Therefore I used only X direction sobel filters. To get as much information as possible, the filters were applied on L and S channel before being combined together. 
 5. Region of interest (ROI) masking: to eliminate regions that can't contain lane lines. A ROI mask is finaly applied on the binary image composed by a bitwise AND of the color thresholded image and the sobel filtered image. an example of the final output is pictured below:
 
-<img src=./output_images/binary_image.png width="400">
+<img src=./output_images/binary_image.png width="600">
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
@@ -275,7 +275,7 @@ The code for these steps is located in the 22nd code cell of the notebook.
 
 The first step is to sum the number of pixel along each column of the lower half of the binary image shown before. The result can be plot as an histogram, as shown in the next figure.
 
-<img src=./output_images/binary_image_half_histo.png width="400">
+<img src=./output_images/binary_image_half_histo.png width="600">
 
 As stated in the project lesson (concept #33):
 >In my thresholded binary image, pixels are either 0 or 1, so the two most prominent peaks in this histogram will be good indicators of the x-position of the base of the lane lines. I can use that as a starting point for where to search for the lines. From that point, I can use a sliding window, placed around the line centers, to find and follow the lines up to the top of the frame.
@@ -285,7 +285,7 @@ The search algorithm can be explained a bit like this:
 * If a sufficient number of "hot pixels" are detected, the following set of windows will be centered on the mean posiiton of these pixels, otherwise the same position is carried on for the following window. 
 * When the windows reach the top of the image, I do a 2nd order polynomial fit on the pixel enclosed by the windows.
 
-<img src=./output_images/slidingwindow.gif width="400">
+<img src=./output_images/slidingwindow.gif width="600">
 
 ##### Lane tracking
 
@@ -297,7 +297,7 @@ The lane tracking algorithm can be explained a bit like this:
 * First, a margin arround the previous fit is computed (see the green zone in the following figure).
 * Then, pixels inside this zone are identified. If no pixels are found in either zones, the last fit is kept and I start incrementing a skiped frame counter.
 
-<img src=./output_images/slid_window_tracking.png width="400">
+<img src=./output_images/slid_window_tracking.png width="600">
 
 * If line pixels were detected, a new 2nd order polynomial fit is computed on those pixels.
 * The new lane width is then computed, if this width is above or below a threshold, the new fit values are droped and the old ones are carried on. The skip counter is also increased.
@@ -320,15 +320,19 @@ Th first step is to convert my polynominal fit coeffcients from the pixel space 
 ##### Radius of curvature
 
 The 2nd order polynomial equation we are fitting is described by the following:
+
 <img src=./output_images/eq1.png height="35">
 
 The radius of curvature at any point x of the function x=f(y) is given as follows:
+
 <img src=./output_images/eq2.png height="80">
 
 In our case the derivatives are:
+
 <img src=./output_images/eq3.png height="100">
 
 Hence the following curvature radius equation :
+
 <img src=./output_images/eq4.png height="55">
 
 The radius of curvature is computed by the `get_lane_curvature()` function (see the 25th code cell). The radius of curvature is computed nearest to the car which corresponds to a y coordinate of 719 (bottom of a 720x1280 image).
@@ -349,22 +353,22 @@ I implemented this step in the 29th code cell in the function named `draw_final_
 
 ---
 
-###Pipeline (video)
+### Pipeline (video)
 
-####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
+#### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
 Here's a link to [download](./project_video_output.mp4) my project video result.
 
 Click on images below to see the full-length YouTube videos..
 
 ##### Project Video Output:
-[![Project Video Output](./output_images/project_output_video.gif)](https://youtu.be/hjzrhPXpDg4)
+[![Project Video Output](./output_images/project_output_video.gif)](https://www.youtube.com/watch?v=6OGJpr8NM38)
 ##### Challenge Video Output:
-[![Challenge Video Output](./output_images/challenge_output_video.gif)](https://youtu.be/1Wza0GCQSns)
+[![Challenge Video Output](./output_images/challenge_output_video.gif)](https://youtu.be/MyvDbLImGN4)
 
 ---
 
-###Discussion
+### Discussion
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 

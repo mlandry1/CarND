@@ -1,0 +1,7 @@
+__pycache__/
+archive/
+dataset/
+.ipynb_checkpoints/
+.idea/
+examples/
+.gitignore~

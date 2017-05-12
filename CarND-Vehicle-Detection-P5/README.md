@@ -1,4 +1,16 @@
 ##Writeup Template
+
+
+### TODO:
+* Modifier un peu le model et le retrainé (diminuer la complexitée)
+* Rapatrier des fonctions de util.py vers le notebook ModelTrain
+* Mieux séparer les étapes de mon pipeline
+* Faire une option de vidéo debug
+* Tuner les ROIs pour que ça foncitonne mieux
+* Implementer la classe de tracking?
+* Faire le rapport...
+
+
 ###You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
 
 ---

@@ -17,11 +17,12 @@ The goals / steps of this project are the following:
 [image7]: ./examples/6.processed-whiteCarLaneSwitch.png "Slope Filter"
 [image8]: ./examples/7.processed-whiteCarLaneSwitch.png "Final result"
 [image9]: ./examples/hilly_road.jpg "Hilly road"
+
 ---
 
 ## Reflection
 
-####1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
+#### 1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
 
 #### Pipeline:
 
@@ -102,14 +103,14 @@ In order to draw a single line on the left and right lanes, I modified the *draw
 -Since, the top and the botom of the region of interest is passed by the function parameters, it is then a matter of isolating x in *y=mx+b* to find the x coordinate of the lines extremities.
 -It finaly calls the ***cv2.line()*** function to draw the lines the image passed in the function parameters.
 
-###2. Identify potential shortcomings with your current pipeline
+### 2. Identify potential shortcomings with your current pipeline
 
 In my opinion, the major shortcomming of this pipeline would be that it assumes a praticaly straight road since it is designed to reject lines with too shallow slopes, it will therefore reject the lane lines when the road is too curvy. It will also be problematic on hilly roads where the algoritm can't "see" the rest of the road ahead because the camera is pointing towards the sky. This is without mentionning the case where a hilly road would result on multiple disconnected line detections (see the picture below). Debris on the road are also at risk of be accepted as line by the algorithm... Finaly, I believe that a bumpy road can shake the car enough to offset the lanes outside of the regions of interest mask temporarily.
 ![alt text][image9]
 
 Another shortcoming could be that it seemed influenced by the lighting/color of the road, especially when I tried the *challenge.mp4* video. In that video, you can see the car going by a tree that projects a shadow on the road, then the road suface is  transitionning from asphalt to concrete and comes back to concrete exactly at the same time as the car passes by another tree. This causes the lane detection algorithm to go haywire, confusing all those contrasts to be lanes.
 
-###3. Suggest possible improvements to your pipeline
+### 3. Suggest possible improvements to your pipeline
 
 A possible improvement would be to be able to adapt the region of interess dynamicaly, following inputs like the steering angle, pitch/yaw/roll rate, x,y,z accel...
 

@@ -60,7 +60,7 @@ Then I made sure the data set was well balanced between both classes (see the 4t
 <img src=./output_images/histogram_dataset.png width="400">
 
 ##### Data preprocessing
-Then, no preprocessing is used other than a normalizing layer embeded into the model's first layer (Keras lambda layer).
+Then no preprocessing is used other than a normalizing layer embeded into the model's first layer (Keras lambda layer).
 
 #### Classifier's architecture
 As stated in the lesson, in a traditional CV setup I would have had to run my classifier accross all possible locations inside the image. A slidding window technique would have been the way to do it along with some initial guesses (tracking the car and estimating its next position) to reduce the search load. 
@@ -137,7 +137,7 @@ A quick test confirms the model is working properly (see 9th code cell) :
 
 <img src=./output_images/inference.png width="800">
 
-###Sliding Window Search
+### Sliding Window Search
 
 #### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
@@ -234,7 +234,7 @@ Here the resulting bounding boxes are drawn onto the last frame in the series:
 
 ---
 
-###Discussion
+### Discussion
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 

@@ -1,4 +1,7 @@
 #include "kalman_filter.h"
+#include <iostream>
+
+using namespace std;
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -51,7 +54,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   TODO: Done!
     * update the state by using Extended Kalman Filter equations
   */
-//  const float pi = 3.14159265358979323846;
+  #define PI 3.14159265358979323846
 
   // recover state parameters
   float px = x_(0);
@@ -65,34 +68,46 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   // pre-compute phi
   float phi = atan2(py,px);
 
-//  // normalize phi (between -pi and pi)
-//  if(phi > pi){
-//    phi = phi - pi;
-//  }
-//  else if(phi < -pi) {
-//    phi = phi + pi;
-//  }
-
-  // pre-compute rho_dot
-  float rho_dot = (px*vx + py*vy)/rho;
+  float rho_dot;
+  // check division by 0
+  if (rho < 0.0001) {
+    rho_dot = (px*vx + py*vy)/0.0001;
+  }
+  else {
+    rho_dot = (px*vx + py*vy)/rho;
+  }
 
   // create hx non-linear vector
   VectorXd hx_(3);
   hx_<< rho, phi, rho_dot;
 
-  // error matrix
+  // error vector
   VectorXd y_ = z - hx_;
+
+  // phi angle normalisation
+  while(y_[1] > PI || y_[1] < -PI)
+  {
+      if(y_[1] > PI)
+          y_[1]-= 2*PI;
+      else y_[1]+= 2*PI;
+  }
 
   // update common KF step
   UpdateKFstep(y_);
 }
 
 void KalmanFilter::UpdateKFstep(const VectorXd &y){
+
+  // H transpose precompute
+  MatrixXd Ht = H_.transpose();
+
   // system uncertainty projection
-  MatrixXd S_ = H_ * P_ * H_.transpose() + R_;
+  MatrixXd S_ = H_ * P_ * Ht + R_;
 
   // Kalman gain
-  VectorXd K_ = P_ * H_.transpose() * S_.inverse();
+  MatrixXd Si = S_.inverse();
+  MatrixXd PHt = P_ * Ht;
+  MatrixXd K_ = PHt * Si;
 
   // states estimate update
   x_ = x_ + (K_ * y);
@@ -100,5 +115,6 @@ void KalmanFilter::UpdateKFstep(const VectorXd &y){
 
   // Uncertainty update
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
+
   P_ = (I - K_ * H_) * P_;
 }

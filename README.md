@@ -13,6 +13,10 @@ Recommended order for exploring these projects is as follows:
 
 ### Term 2
 - Extended Kalman Filters - P6
+- Unscented Kalman Filters - P7
+- Kidnapped Vehicle Project - P8
+- PID Controller - P9
+- Model Predictive Control - P10
 
 ## About this Course
 

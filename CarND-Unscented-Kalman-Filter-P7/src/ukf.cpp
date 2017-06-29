@@ -64,12 +64,12 @@ UKF::UKF() {
    *******************************************************************************************/
 
   // initial covariance matrix (diagonal: (sigma_px^2, sigma_py^2, sigma_v^2, sigma_psi^2, sigma_psi_dot^2)
-  MatrixXd P = MatrixXd(n_x_, n_x_);
-  P <<  0.03,   0.0,    0.0,     0.0,     0.0,
-        0.0,    0.03,   0.0,     0.0,     0.0,
-        0.0,    0.0,    0.01,    0.0,     0.0,
-        0.0,    0.0,    0.0,     0.03,    0.0,
-        0.0,    0.0,    0.0,     0.0,     0.03;
+  P_ = MatrixXd(n_x_, n_x_);
+  P_ <<  0.03,   0.0,    0.0,     0.0,     0.0,
+         0.0,    0.03,   0.0,     0.0,     0.0,
+         0.0,    0.0,    0.01,    0.0,     0.0,
+         0.0,    0.0,    0.0,     0.03,    0.0,
+         0.0,    0.0,    0.0,     0.0,     0.03;
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
   std_a_ = 0.5;
@@ -498,12 +498,6 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   position. Modify the state vector, x_, and covariance, P_.
   You'll also need to calculate the radar NIS.
   */
-
-  //predicted measurement covariance matrix S
-  MatrixXd S = MatrixXd(n_z_radar_, n_z_radar_);
-
-  //mean predicted measurement
-  VectorXd z = VectorXd(n_z_radar_);
 
   /*****************************************************************************
    *  Measurement Prediction

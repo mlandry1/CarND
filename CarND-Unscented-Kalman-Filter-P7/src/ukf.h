@@ -79,6 +79,12 @@ public:
   ///* Sigma point spreading parameter
   double lambda_;
 
+  ///* lidar incoming measurement vector
+  VectorXd z_radar_;
+
+  ///* lidar incoming measurement vector
+  VectorXd z_lidar_;
+
   ///* the current NIS for radar
   double NIS_radar_;
 
@@ -121,29 +127,20 @@ public:
    */
   void UpdateRadar(MeasurementPackage meas_package);
 
-  /** TODO:
-   * Generates sigma points
-   * @param Xsig_out
+  /** Generates augmented sigma points
+   * @param {MatrixXd*} Xsig_out
    */
   void AugmentedSigmaPoints(MatrixXd* Xsig_out);
 
-  /** TODO:
-   * Generates sigma points
-   * @param Xsig_out
+  /** Predict sigma points
+   * @param {MatrixXd*} Xsig_out, {double} delta_t
    */
   void SigmaPointPrediction(MatrixXd* Xsig_out, double delta_t);
 
-  /** TODO:
-   * Generates sigma points
-   * @param Xsig_out
+  /** Predicts State Mean And Covariance
+   * @param {MatrixXd*} Xsig_out
    */
   void PredictMeanAndCovariance(VectorXd* x_pred, MatrixXd* P_pred);
-
-  /** TODO: description
-   * @param
-   */
-  void UpdateState(VectorXd* x_out, MatrixXd* P_out);
-
 };
 
 #endif /* UKF_H */

@@ -28,7 +28,7 @@ The P, or "proportional", component takes into account only the present value of
  
 The D, or "differential", component. The D component contributes to the control output  by `Kd * d/dt * cte`. This component is thus proportional to the "speed of the error". For example, when the car is approaching the lane's center, `cte` is decreasing while still being positive.  `d/dt*cte` is on its part negative.. It is thus counteracting the action of the P component and helping with the controler's reaction damping.
 
-The I, or "integral", component The I component contributes to the control output by `Ki * sum(cte)`. Thus it takes into account the cumulative error wich can come from several sources such as a steering bias. In the case however, the steering biais was not evident but the I component was contrbuting to eliminate the steady-state errors, in straight lines or in the curves.
+The I, or "integral", component The I component contributes to the control output by `Ki * sum(cte)`. Thus it takes into account the cumulative error wich can come from several sources such as a steering bias. In the case however, the steering bias was not evident but the I component was contrbuting to eliminate the steady-state errors, in straight lines or in the curves.
 
 While the PID controller is easy to implement, it is not so easy to tune...
 
@@ -38,7 +38,7 @@ While the PID controller is easy to implement, it is not so easy to tune...
 First, I went for a manual tuning. I used a method similar to the one described [here](https://en.wikipedia.org/wiki/PID_controller#Manual_tuning). 
 
 ##### Kp tuning
-At first, I created two pid controler. The first for speed regulation, the second one for steering control. I then setuped both controller with small values of Kp at first.
+At first, I created two PID controlers. The first for speed regulation, the second one for steering control. I then setuped both controllers with small values of Kp.
 
 ##### Speed regulator final tuning
 I then focused only on the speed regulator. I increased the Kp value until I reached a state of "constant oscillation". The value of the gain at this step is called the "*utlimate gain*". I then tuned Kp to half of this *ultimate gain*. The next step was to tune the Ki component of my speed regulator. I increased Ki until I reached a stable speed without any steady state error. I then added a bit of Kd to improve response time.
@@ -46,7 +46,7 @@ I then focused only on the speed regulator. I increased the Kp value until I rea
 ##### Steering regulator
 Now that the speed regulator is functional, let's dive into the steering regulator's tuning. 
 
-Starting with a small Kp value and a small speed value (~30mph) , I then increased the Kd carefuly to dampen the oscillation. I found that further relaxing of the Kp parameter helped to make room for a stronger Kd, yeilding better performance...
+Starting with a small Kp value and a small speed value (~30mph) , I then increased the Kd carefuly to dampen the oscillation. I found that further relaxing of the Kp parameter helped me to make room for a stronger Kd, yeilding better performance...
 
 | Parameter | Value |
 |:-------------:|:------:|
@@ -81,17 +81,21 @@ I ended up reseting the simulator after a fixed number of step. I used the follo
       first_it == false;
     }
 ```
-Finaly I sadly found no significant improvement over my manually tuned gains. This was very disapointing since I spent a lot of time on the twiddle implementation in my code.
+Finaly, I sadly found no significant improvement over my manually tuned gains. This was very disapointing since I spent a lot of time on the twiddle implementation in my code.
 
 ### 3. Additional stuff, I have done to improve the speed/error arround the track.
 
 #### Throttle control (racing mode)
 
-To increase the speed arround the track, I first went for just increasing the speed regulator' setpoint. Up until 45-50mph, the car gets by and drives arround the track. However I found that higher speeds can't be sustained into all the curves of the track. 
+To increase the speed arround the track, my first guess was to increase the speed regulator's setpoint. Up until 45-50mph, the car gets by and can drive arround the track properly. However I found that higher speeds can't be sustained into all the curves of the track. 
 
-To reach higher speeds, I had to design a logic to slow down the car into the curves. At first I implmented something that acted directly on the Speed setpoint but it porved to slow to react. Then I stumbled onto a fellow CarND student's blog post that explained the strategy she used to control the throttle in her PID project [(Mithi's blog post)](https://medium.com/@mithi/a-review-of-udacitys-self-driving-car-engineer-nanodegree-second-term-56147f1d01ef).
+To reach higher speeds, I had to design a logic to slow down the car into the curves. At first I implmented something that acted directly on the speed setpoint but it proved to be too slow to react. I then stumbled onto a fellow CarND student's blog post that explained the strategy she used to control the throttle in her PID project [(Mithi's blog post)](https://medium.com/@mithi/a-review-of-udacitys-self-driving-car-engineer-nanodegree-second-term-56147f1d01ef).
 
-Below is the code I used, wich is exactly the same as Mithi's except for values. The idea is to completely brake the car, if ever the steering angle becomes greater thant 5deg, while the speed is greater than 45mph and the cross-track error is greater than 0.4m. Otherwise it is pedal to the metal!
+Below is the code I used, it is carbon copy of Mithi's code except for values. The idea is to completely brake the car when in the folling conditions:
+-the steering angle is greater than 5.5deg AND
+-the speed is greater than 50mph AND
+-the cross-track error is greater than 0.35m.
+Otherwise it is pedal to the metal!
 
 ```sh
 throttle_value = 1.0;
@@ -120,7 +124,7 @@ steer_value = pid_s.Update(-fabs(cte)/cte * pow(fabs(cte),1.2));
 
 #### Anti-Wind Up
 
-The wind-up of the integrator is commonly problematic when using a PID in the real life. That's why I also implemented the code below. This prevent the integrator to wind up by preventing incrementation of *i_error* if the controller's output magnitude is greater than *max_output* or *min_output*. The value of *i_error* can also be individualy limited.
+The wind-up of the integrator is commonly problematic when using a PID in the real life. That's why I also implemented the code below. This prevent the integrator to wind up by stoping the incrementation of *i_error* if the controller's output magnitude is greater than *max_output* or *min_output*. The value of *i_error* can also be individualy limited.
 
 ```sh
   // Limit integrator value according to a scale of Ki

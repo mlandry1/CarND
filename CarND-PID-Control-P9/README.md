@@ -92,9 +92,10 @@ To increase the speed arround the track, my first guess was to increase the spee
 To reach higher speeds, I had to design a logic to slow down the car into the curves. At first I implmented something that acted directly on the speed setpoint but it proved to be too slow to react. I then stumbled onto a fellow CarND student's blog post that explained the strategy she used to control the throttle in her PID project [(Mithi's blog post)](https://medium.com/@mithi/a-review-of-udacitys-self-driving-car-engineer-nanodegree-second-term-56147f1d01ef).
 
 Below is the code I used, it is carbon copy of Mithi's code except for values. The idea is to completely brake the car when in the folling conditions:
--the steering angle is greater than 5.5deg AND
--the speed is greater than 50mph AND
--the cross-track error is greater than 0.35m.
+* the steering angle is greater than 5.5deg AND
+* the speed is greater than 50mph AND
+* the cross-track error is greater than 0.35m.
+
 Otherwise it is pedal to the metal!
 
 ```sh

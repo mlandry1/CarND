@@ -65,6 +65,34 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
   return result;
 }
 
+/*
+ *  Simulate the car state in the future to take into account the latency
+ */
+Eigen::VectorXd simulation(Eigen::VectorXd state, Eigen::VectorXd coeffs, double delta0, double a0, double dt){
+
+  const double Lf = 2.67;
+
+  // Present state of the car
+  double x0    = state[0];
+  double y0    = state[1];
+  double psi0  = state[2];
+  double v0    = state[3];
+  double cte0  = state[4];
+  double epsi0 = state[5];
+
+  double x1      = (x0 + v0 * cos(psi0) * dt);
+  double y1      = (y0 + v0 * sin(psi0) * dt);
+  double psi1    = (psi0 - v0 * delta0 / Lf * dt);
+  double v1      = (v0 + a0 * dt);
+  double cte1    = (cte0 + (v0 * sin(epsi0) * dt));
+  double epsi1   = (epsi0 - v0 * delta0 / Lf * dt);
+
+  Eigen::VectorXd state_future(6);
+  state_future << x1, y1, psi1, v1, cte1, epsi1;
+
+  return state_future;
+}
+
 int main() {
   uWS::Hub h;
 
@@ -103,7 +131,7 @@ int main() {
           double v = j[1]["speed"];
 
           /*
-           * TODO: Use for delay estimation..
+           * Used for delay estimation..
            */
           double steer_value = j[1]["steering_angle"];
           double throttle_value = j[1]["throttle"];
@@ -157,7 +185,7 @@ int main() {
           /*
            *  Simulate the car state 100ms in the future to take into account the latency
            */
-
+          state = simulation(state, coeffs, steer_value, throttle_value, 0.100);
 
           /*
            * Calculate steering angle and throttle using MPC
@@ -200,12 +228,12 @@ int main() {
           /*
            *  Distance between turning wheels and car CG...
            */
-          double Lf = 2.67;
+          const double Lf = 2.67;
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
-          msgJson["steering_angle"] = vars[0]/(deg2rad(25)*Lf); //TODO: WTF Lf?
+          msgJson["steering_angle"] = vars[0]/(deg2rad(25)*Lf);
           msgJson["throttle"] = vars[1];
 
           //Display the waypoints/reference line
@@ -217,7 +245,7 @@ int main() {
           msgJson["mpc_y"] = mpc_y_vals;
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          //std::cout << msg << std::endl;
+          std::cout << msg << std::endl;
           // Latency
           // The purpose is to mimic real driving conditions where
           // the car does actuate the commands instantly.

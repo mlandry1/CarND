@@ -6,8 +6,8 @@
 using CppAD::AD;
 
 // Set the timestep length and duration
-size_t N = 10;
-double dt = 0.1;
+size_t N = 12;
+double dt = 0.125;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -70,7 +70,8 @@ class FG_eval {
       fg[0] += 5*CppAD::pow(vars[delta_start + t], 2);
       fg[0] += 5*CppAD::pow(vars[a_start + t], 2);
 
-      fg[0] += 50*CppAD::pow(vars[delta_start + t] * vars[v_start + t], 2);
+      // Minimize speed when steering angle is great
+      fg[0] += 10*CppAD::pow(vars[delta_start + t] * vars[v_start + t], 2);
     }
 
     /*
@@ -133,10 +134,11 @@ class FG_eval {
        */
       fg[2 + x_start + t]    = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
       fg[2 + y_start + t]    = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
-      fg[2 + psi_start + t]  = psi1 - (psi0 - v0 * delta0 / Lf * dt);
+      fg[2 + psi_start + t]  = psi1 - (psi0 + v0 * (-delta0) / Lf * dt);
       fg[2 + v_start + t]    = v1 - (v0 + a0 * dt);
+//      fg[2 + cte_start + t]  = cte1 - (cte0 + (v0 * CppAD::sin(epsi0) * dt));
       fg[2 + cte_start + t]  = cte1 - ((f0 - y0) + (v0 * CppAD::sin(epsi0) * dt));
-      fg[2 + epsi_start + t] = epsi1 - ((psi0 - psides0) - v0 * delta0 / Lf * dt);
+      fg[2 + epsi_start + t] = epsi1 - ((psi0 - psides0) + v0 * (-delta0) / Lf * dt);
     }
   }
 };
@@ -171,7 +173,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   for(int i = 0; i < n_vars; i++) {
     vars[i] = 0;
   }
-  // Set the initial variable values //TODO: WTF ??
+  // Set the initial variable values
   vars[x_start] = x;
   vars[y_start] = y;
   vars[psi_start] = psi;
@@ -194,7 +196,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // degrees (values in radians).
   // NOTE: Feel free to change this to something else.
   for (int i = delta_start; i < a_start; i++) {
-    vars_lowerbound[i] = -0.436332*Lf;  //TODO: WTF??
+    vars_lowerbound[i] = -0.436332*Lf;
     vars_upperbound[i] = 0.436332*Lf;
   }
 
@@ -239,7 +241,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // options for IPOPT solver
   std::string options;
   // Uncomment this if you'd like more print information
-  options += "Integer print_level  0\n";
+//  options += "Integer print_level  0\n";
   // NOTE: Setting sparse to true allows the solver to take advantage
   // of sparse routines, this makes the computation MUCH FASTER. If you
   // can uncomment 1 of these and see if it makes a difference or not but
@@ -249,15 +251,20 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   options += "Sparse  true        reverse\n";
   // NOTE: Currently the solver has a maximum time limit of 0.5 seconds.
   // Change this as you see fit.
-  options += "Numeric max_cpu_time          0.1\n";  // TODO: 100ms instead of 500ms ~10fps
+  options += "Numeric max_cpu_time          0.05\n";  // minimum of 20fps
 
   // place to return solution
   CppAD::ipopt::solve_result<Dvector> solution;
 
   // solve the problem
-  CppAD::ipopt::solve<Dvector, FG_eval>(
-      options, vars, vars_lowerbound, vars_upperbound, constraints_lowerbound,
-      constraints_upperbound, fg_eval, solution);
+  CppAD::ipopt::solve<Dvector, FG_eval>(options,
+                                        vars,
+                                        vars_lowerbound,
+                                        vars_upperbound,
+                                        constraints_lowerbound,
+                                        constraints_upperbound,
+                                        fg_eval,
+                                        solution);
 
   // Check some of the solution values
   ok &= solution.status == CppAD::ipopt::solve_result<Dvector>::success;
@@ -266,7 +273,9 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   auto cost = solution.obj_value;
   std::cout << "Cost " << cost << std::endl;
 
-  // Return the first actuator values and then the predicted trajectory
+  /*
+   *  Return the first actuator values and then the predicted trajectory
+   */
   vector<double> result;
 
   result.push_back(solution.x[delta_start]);

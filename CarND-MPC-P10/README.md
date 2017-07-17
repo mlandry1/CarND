@@ -48,11 +48,11 @@ where
 
 ```sh
 cte[t]   //  the cross-track error
-epsi[t] // the orientation error
-delta[t]  // the steering command
-a[t]       // the acceleration command
-f[x[t]]   // the trajectory fitted polynomial expressed in the vehicle frame
-f'[x[t]]  // the derivative according to x[t] of f[x [t]]
+epsi[t]  // the orientation error
+delta[t] // the steering command
+a[t]     // the acceleration command
+f[x[t]]  // the trajectory fitted polynomial expressed in the vehicle frame
+f'[x[t]] // the derivative according to x[t] of f[x [t]]
 psides[t] = atan(f'[x[t]])
 ```
 
@@ -83,8 +83,8 @@ The waypoints feeded by the simulator are expressed in the global frame. The fir
 
 ```sh
 /*
-*  Convert the waypoints to the vehicle frame
-*/
+ *  Convert the waypoints to the vehicle frame
+ */
 for(int i = 0; i < ptsx.size(); ++i) {
 
   double shift_x = ptsx[i] - px;

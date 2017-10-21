@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mlandry/CarND/Labs/Term3/Lesson 3 - 16/cpp/CarND-GNB classifier-Driver Behaviours/src/classifier.cpp
+iostream
+-
+sstream
+-
+fstream
+-
+math.h
+-
+vector
+-
+classifier.h
+/home/mlandry/CarND/Labs/Term3/Lesson 3 - 16/cpp/CarND-GNB classifier-Driver Behaviours/src/classifier.h
+
+/home/mlandry/CarND/Labs/Term3/Lesson 3 - 16/cpp/CarND-GNB classifier-Driver Behaviours/src/classifier.h
+iostream
+-
+sstream
+-
+fstream
+-
+math.h
+-
+vector
+-
+
+/home/mlandry/CarND/Labs/Term3/Lesson 3 - 16/cpp/CarND-GNB classifier-Driver Behaviours/src/main.cpp
+classifier.h
+/home/mlandry/CarND/Labs/Term3/Lesson 3 - 16/cpp/CarND-GNB classifier-Driver Behaviours/src/classifier.h
+iostream
+-
+fstream
+-
+math.h
+-
+vector
+-
+

@@ -60,28 +60,31 @@ void Road::advance() {
 
   map<int ,vector<vector<int> > > predictions;
 
+  // for every vehicles on the road..
   map<int, Vehicle>::iterator it = this->vehicles.begin();
-    while(it != this->vehicles.end())
-    {
+    while(it != this->vehicles.end()) {
         int v_id = it->first;
+        // predictions for all vehicles on the road, assuming constant acceleration and no lane change
         vector<vector<int> > preds = it->second.generate_predictions(10);
         predictions[v_id] = preds;
         it++;
     }
+
+  // for every vehicles on the road..
   it = this->vehicles.begin();
-  while(it != this->vehicles.end())
-    {
-      int v_id = it->first;
-        if(v_id == ego_key)
-        {
-          it->second.update_state(predictions);
-          it->second.realize_state(predictions);
-        }
-        it->second.increment(1);
-        
-        it++;
+  while(it != this->vehicles.end()) {
+    int v_id = it->first;
+
+    // if vehicle id is ego
+    if(v_id == ego_key) {
+      it->second.update_state(predictions);
+      it->second.realize_state(predictions);
     }
-    
+    // increment the simulation
+    it->second.increment(1);
+
+    it++;
+  }
 }
 
 void Road::display(int timestep) {

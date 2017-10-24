@@ -6,11 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/main.cpp
+/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/main.cpp
 road.h
-/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.h
+/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.h
 vehicle.h
-/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.h
+/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.h
 iostream
 -
 fstream
@@ -20,13 +20,13 @@ math.h
 vector
 -
 
-/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.cpp
+/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.cpp
 iostream
 -
 road.h
-/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.h
+/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.h
 vehicle.h
-/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.h
+/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.h
 iostream
 -
 math.h
@@ -38,7 +38,7 @@ string
 iterator
 -
 
-/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.h
+/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.h
 iostream
 -
 random
@@ -60,13 +60,13 @@ string
 iterator
 -
 vehicle.h
-/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.h
+/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.h
 
-/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.cpp
+/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.cpp
 iostream
 -
 vehicle.h
-/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.h
+/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.h
 math.h
 -
 map
@@ -80,9 +80,9 @@ vector
 algorithm
 -
 assert.h
-/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/assert.h
+/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/assert.h
 
-/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.h
+/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.h
 iostream
 -
 random

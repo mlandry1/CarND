@@ -43,10 +43,10 @@ RM = /home/mlandry/tools/cmake-3.5.2-Linux-x86_64/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src"
+CMAKE_SOURCE_DIR = "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build"
+CMAKE_BINARY_DIR = "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build"
 
 # Include any dependencies generated for this target.
 include CMakeFiles/BehaviorPlanner-CPP.dir/depend.make
@@ -58,17 +58,17 @@ include CMakeFiles/BehaviorPlanner-CPP.dir/progress.make
 include CMakeFiles/BehaviorPlanner-CPP.dir/flags.make
 
 CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.o: CMakeFiles/BehaviorPlanner-CPP.dir/flags.make
-CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.o: /home/mlandry/CarND/Labs/Term3/Lesson\ 4\ -\ 16/cpp/CarND\ -\ Behavior\ Planner/src/main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.o -c "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/main.cpp"
+CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.o: /home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson\ 4\ -\ 16/cpp/CarND\ -\ Behavior\ Planner/src/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.o -c "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/main.cpp"
 
 CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/main.cpp" > CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/main.cpp" > CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.i
 
 CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/main.cpp" -o CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/main.cpp" -o CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.s
 
 CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.o.requires:
 
@@ -82,17 +82,17 @@ CMakeFiles/BehaviorPlanner-CPP.dir/main.cpp.o.provides.build: CMakeFiles/Behavio
 
 
 CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.o: CMakeFiles/BehaviorPlanner-CPP.dir/flags.make
-CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.o: /home/mlandry/CarND/Labs/Term3/Lesson\ 4\ -\ 16/cpp/CarND\ -\ Behavior\ Planner/src/road.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.o -c "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.cpp"
+CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.o: /home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson\ 4\ -\ 16/cpp/CarND\ -\ Behavior\ Planner/src/road.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.o -c "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.cpp"
 
 CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.cpp" > CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.cpp" > CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.i
 
 CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.cpp" -o CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/road.cpp" -o CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.s
 
 CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.o.requires:
 
@@ -106,17 +106,17 @@ CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.o.provides.build: CMakeFiles/Behavio
 
 
 CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.o: CMakeFiles/BehaviorPlanner-CPP.dir/flags.make
-CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.o: /home/mlandry/CarND/Labs/Term3/Lesson\ 4\ -\ 16/cpp/CarND\ -\ Behavior\ Planner/src/vehicle.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.o -c "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.cpp"
+CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.o: /home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson\ 4\ -\ 16/cpp/CarND\ -\ Behavior\ Planner/src/vehicle.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.o -c "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.cpp"
 
 CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.cpp" > CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.cpp" > CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.i
 
 CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.cpp" -o CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src/vehicle.cpp" -o CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.s
 
 CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.o.requires:
 
@@ -143,7 +143,7 @@ BehaviorPlanner-CPP: CMakeFiles/BehaviorPlanner-CPP.dir/road.cpp.o
 BehaviorPlanner-CPP: CMakeFiles/BehaviorPlanner-CPP.dir/vehicle.cpp.o
 BehaviorPlanner-CPP: CMakeFiles/BehaviorPlanner-CPP.dir/build.make
 BehaviorPlanner-CPP: CMakeFiles/BehaviorPlanner-CPP.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir="/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable BehaviorPlanner-CPP"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir="/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable BehaviorPlanner-CPP"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/BehaviorPlanner-CPP.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -162,6 +162,6 @@ CMakeFiles/BehaviorPlanner-CPP.dir/clean:
 .PHONY : CMakeFiles/BehaviorPlanner-CPP.dir/clean
 
 CMakeFiles/BehaviorPlanner-CPP.dir/depend:
-	cd "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src" "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src" "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build" "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build" "/home/mlandry/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build/CMakeFiles/BehaviorPlanner-CPP.dir/DependInfo.cmake" --color=$(COLOR)
+	cd "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src" "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/src" "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build" "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build" "/home/mlandry/CarND/GitHub/CarND/Labs/Term3/Lesson 4 - 16/cpp/CarND - Behavior Planner/build/CMakeFiles/BehaviorPlanner-CPP.dir/DependInfo.cmake" --color=$(COLOR)
 .PHONY : CMakeFiles/BehaviorPlanner-CPP.dir/depend
 

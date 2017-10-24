@@ -51,6 +51,7 @@ int main() {
     if (timestep > 35) {
       break;
     }
+    //run the simulation
     road.advance();
     road.display(timestep);
     //time.sleep(float(1.0) / FRAMES_PER_SECOND);

@@ -122,19 +122,19 @@ public:
   vector<vector<int> > generate_predictions(int horizon);
 
   /******************/
-  double change_lane_cost(Vehicle* ptr_vehicle, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, Vehicle::TrajectoryData data);
+  double change_lane_cost(vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, Vehicle::TrajectoryData data);
 
-  double distance_from_goal_lane(Vehicle* ptr_vehicle, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, Vehicle::TrajectoryData data);
+  double distance_from_goal_lane(vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, Vehicle::TrajectoryData data);
 
-  double inefficiency_cost(Vehicle* ptr_vehicle, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, Vehicle::TrajectoryData data);
+  double inefficiency_cost(vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, Vehicle::TrajectoryData data);
 
-  double collision_cost(Vehicle* ptr_vehicle, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, Vehicle::TrajectoryData data);
+  double collision_cost(vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, Vehicle::TrajectoryData data);
 
-  double buffer_cost(Vehicle* ptr_vehicle, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, Vehicle::TrajectoryData data);
+  double buffer_cost(vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, Vehicle::TrajectoryData data);
 
-  double calculate_cost(Vehicle* ptr_vehicle, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions);
+  double calculate_cost(vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions);
 
-  TrajectoryData get_helper_data(Vehicle* ptr_vehicle, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions);
+  TrajectoryData get_helper_data(vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions);
 
   bool check_collision(Vehicle::snapshot snapshot, double s_previous, double s_now);
 

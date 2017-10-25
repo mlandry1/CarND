@@ -36,7 +36,6 @@ Vehicle::Vehicle(int lane, int s, int v, int a) {
 
 Vehicle::~Vehicle() {}
 
-// TODO - Implement this method.
 void Vehicle::update_state(map<int,vector < vector<int> > > predictions) {
 	/*
   Updates the "state" of the vehicle by assigning one of the
@@ -78,7 +77,7 @@ void Vehicle::update_state(map<int,vector < vector<int> > > predictions) {
     std::cout << " Next state is " << _state << std::endl;
   }
 
-  state = _state; // this is an example of how you change state.
+  state = _state;
 }
 
 string Vehicle::_get_next_state(map<int,vector < vector<int> > > predictions) {
@@ -126,7 +125,6 @@ string Vehicle::_get_next_state(map<int,vector < vector<int> > > predictions) {
     }
   }
 
-//TODO Change to best state
   return best_state;
 }
 

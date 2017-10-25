@@ -110,6 +110,9 @@ void Road::display(int timestep) {
 
     }
 
+    if(s_min <= this->goal_s && this->goal_s < s_max)
+      road[this->goal_s - s_min][this->goal_lane] = " -G- ";
+
     map<int, Vehicle>::iterator it = this->vehicles.begin();
     while(it != this->vehicles.end())
     {
@@ -193,6 +196,8 @@ void Road::add_ego(int lane_num, int s, vector<int> config_data) {
     Vehicle ego = Vehicle(lane_num, s, this->lane_speeds[lane_num], 0);
     ego.configure(config_data);
     ego.state = "KL";
+    this->goal_s = ego.goal_s;
+    this->goal_lane = ego.goal_lane;
     this->vehicles.insert(std::pair<int,Vehicle>(ego_key,ego));
     
 }

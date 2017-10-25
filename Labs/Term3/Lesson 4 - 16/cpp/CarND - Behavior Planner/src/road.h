@@ -35,6 +35,10 @@ public:
 
     int vehicles_added = 0;
 
+    int goal_lane;
+
+    int goal_s;
+
     /**
     * Constructor
     */

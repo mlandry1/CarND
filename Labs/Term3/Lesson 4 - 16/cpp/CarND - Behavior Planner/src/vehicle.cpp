@@ -32,7 +32,7 @@ Vehicle::Vehicle(int lane, int s, int v, int a) {
 #define DESIRED_BUFFER    1.5 // timestep
 #define PLANNING_HORIZON  2
 
-#define DEBUG true
+#define DEBUG false
 
 Vehicle::~Vehicle() {}
 
@@ -66,7 +66,7 @@ void Vehicle::update_state(map<int,vector < vector<int> > > predictions) {
       {"s" : 4, "lane": 0},
       {"s" : 6, "lane": 0},
       {"s" : 8, "lane": 0},
-      {"s" : 10, "lane": 0},
+      {"s" : 10, "lane":
     ]
   }
 
@@ -85,12 +85,14 @@ string Vehicle::_get_next_state(map<int,vector < vector<int> > > predictions) {
 
   vector<string> states = {"KL", "LCL", "LCR", "PLCL", "PLCR"};
 
-  // Remove impossible states
+  // Remove impossible/unuseful next states
   if(this->lane == 0){
-    states.erase(std::remove(states.begin(), states.end(), "LCL"), states.end());
+    states.erase(std::remove(states.begin(), states.end(), "LCR"), states.end());
+    states.erase(std::remove(states.begin(), states.end(), "PLCR"), states.end());
   }
   if(this->lane == this->lanes_available - 1){
-    states.erase(std::remove(states.begin(), states.end(), "LCR"), states.end());
+    states.erase(std::remove(states.begin(), states.end(), "LCL"), states.end());
+    states.erase(std::remove(states.begin(), states.end(), "PLCL"), states.end());
   }
 
   // initialize a bunch of variables
@@ -106,7 +108,6 @@ string Vehicle::_get_next_state(map<int,vector < vector<int> > > predictions) {
     // compute the ego vehicle trajectory for a given FSM state
     trajectory = this->_trajectory_for_state(states[i], predictions_copy, 5);
 
-    // TODO: remove the xplicit vehicle pointer..
     // compute the cost of the ego vehicle trajectory and note the associated FSM state
     cost.cost = this->calculate_cost(trajectory, predictions);
     cost.state = states[i];

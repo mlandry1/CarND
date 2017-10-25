@@ -4,6 +4,8 @@
 #include <fstream>
 #include <math.h>
 #include <vector>
+#include <chrono>
+#include <thread>
 
 using namespace std;
 
@@ -54,7 +56,8 @@ int main() {
     //run the simulation
     road.advance();
     road.display(timestep);
-    //time.sleep(float(1.0) / FRAMES_PER_SECOND);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000/FRAMES_PER_SECOND));
   }
   Vehicle ego = road.get_ego();
   if (ego.lane == GOAL[1])

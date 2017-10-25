@@ -61,6 +61,7 @@ class Vehicle(object):
     """
     state = self._get_next_state(predictions)
     # pdb.set_trace()
+    print("\nNext state is:", state, "\n")
     self.state = state
     # self.state = "KL" # this is an example of how you change state.
   

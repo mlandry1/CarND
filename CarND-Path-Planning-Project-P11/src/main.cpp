@@ -9,6 +9,19 @@
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
 #include "spline.h"
+#include "vehicle.h"
+#include "cost.h"
+
+#define DELTA_T 0.02
+#define DESIRED_BUFFER 30.0  //m
+
+#define DEBUG true
+
+#define MAX_JERK     50.0    // m/s³
+#define MAX_ACCEL    10.0    // m/s²
+#define SPEED_LIMIT  49.5 //22.352  // 50 MPH in m/s
+
+#define NUM_LANES    3
 
 using namespace std;
 
@@ -39,6 +52,7 @@ double distance(double x1, double y1, double x2, double y2)
 {
 	return sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
 }
+
 int ClosestWaypoint(double x, double y, const vector<double> &maps_x, const vector<double> &maps_y)
 {
 
@@ -170,11 +184,23 @@ int main() {
   vector<double> map_waypoints_dx;
   vector<double> map_waypoints_dy;
 
-  // start in lane 1
-  int lane = 1;
 
-  // have a reference velocity to target
+  // ego vehicle starting conditions..
+  int lane = 1;
+  int s = 0;
   double ref_vel = 0.0; //mph
+
+  // TODO: tout convertir en double ????
+  // ego vehicle config
+  vector<int> ego_config = {NUM_LANES, (int)SPEED_LIMIT, (int)MAX_ACCEL};
+
+  // create ego vehicle object
+  Vehicle ego = Vehicle(lane, s, (int)ref_vel, 0);
+  ego.configure(ego_config);
+  ego.FSM_state = "KL";
+
+
+
 
   // Waypoint map to read from
   string map_file_ = "../data/highway_map.csv";
@@ -246,54 +272,56 @@ int main() {
 
           json msgJson;
 
-          // TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
+          /*
+           Define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
+           */
 
+          // If we have leftover points from the previous path given to the simulator
           int prev_size = previous_path_x.size();
-
           if(prev_size >0)
           {
+            // let's modify our current car position and take it to the last position of the previous path
             car_s = end_path_s;
           }
 
           bool too_close = false;
 
-          // find ref_v to use
+          // for all vehicle in sensor fusion vector
           for(int i = 0; i < sensor_fusion.size(); i++)
           {
             //car is in my lane
             float d = sensor_fusion[i][6];
-            if(d < (2+4*lane+2) && d > (2+4*lane-2))
+
+            double center_ego_lane = (2+4*lane);
+            if(d < (center_ego_lane + 2) && d > (center_ego_lane - 2))
             {
               double vx = sensor_fusion[i][3];
               double vy = sensor_fusion[i][4];
               double check_speed = sqrt(vx*vx+vy*vy);
               double check_car_s = sensor_fusion[i][5];
 
-              check_car_s+=((double)prev_size*0.02*check_speed); //if using previous points can project s value out
-              //check s values greater than mine and s gap
-              if((check_car_s > car_s) && ((check_car_s-car_s) < 30))
+              //if using previous points we predict the car s value in the future
+              check_car_s+=((double)prev_size*DELTA_T*check_speed);
+
+              // If the car is in front of ego vehicle closer than s gap
+              if((check_car_s > car_s) && ((check_car_s-car_s) < DESIRED_BUFFER))
               {
-                // Do some logic here, lower reference velocity so we dont crash into the car infront of us, could
-                // also flag to try to change lanes.
                 too_close = true;
                 if(lane > 0)
                 {
                   lane=0;
-
-
                 }
               }
-
             }
           }
 
           if(too_close)
           {
-            ref_vel -= .224;
+            ref_vel -= MAX_ACCEL * DELTA_T;
           }
-          else if(ref_vel < 49.5)
+          else if(ref_vel < SPEED_LIMIT)
           {
-            ref_vel += .224;
+            ref_vel += MAX_ACCEL * DELTA_T;;
           }
 
           // Create a list of widely spaced (x,y) waypoints, evenly spaced at 30m

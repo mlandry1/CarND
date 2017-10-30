@@ -20,9 +20,9 @@
 #define PLANNING_HORIZON  2
 #define DESIRED_BUFFER    1.5 // timestep
 
-#define DEBUG true
+#define DEBUG_COST true
 
-//double change_lane_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, TrajectoryData data){
+//double change_lane_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
 //
 //  // Penalizes lane changes AWAY from the goal lane and rewards
 //  // lane changes TOWARDS the goal lane.
@@ -35,14 +35,14 @@
 //  if (proposed_lanes < cur_lanes)
 //    cost = -COMFORT;
 //
-//  if(DEBUG){
+//  if(DEBUG_COST){
 //    std::cout << __FUNCTION__ << " has cost " << cost << " for lane " << trajectory[0].lane <<std::endl<<std::endl;
 //  }
 //
 //  return cost;
 //}
 //
-//double distance_from_goal_lane(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, TrajectoryData data){
+//double distance_from_goal_lane(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
 //
 //  // Penalizes lane distance vs time to change lane
 //
@@ -53,14 +53,14 @@
 //  double multiplier = 5 * lanes / time_to_goal;
 //  double cost = multiplier * REACH_GOAL;
 //
-//  if(DEBUG){
+//  if(DEBUG_COST){
 //    std::cout << __FUNCTION__ << " has cost " << cost << " for lane " << trajectory[0].lane <<std::endl;
 //  }
 //
 //  return cost;
 //}
 
-double inefficiency_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, TrajectoryData data){
+double inefficiency_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
 
   // Penalizes lower/higher speed than requested
 
@@ -71,14 +71,10 @@ double inefficiency_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> traject
   double multiplier = pow(pct, 2.0);
   double cost = multiplier * EFFICIENCY;
 
-  if(DEBUG){
-    std::cout << __FUNCTION__ << " has cost " << cost << " for lane " << trajectory[0].lane <<std::endl;
-  }
-
   return cost;
 }
 
-double collision_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, TrajectoryData data){
+double collision_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
   double cost;
   if (data.collides.collision){
     int time_til_collision = data.collides.time;
@@ -90,14 +86,10 @@ double collision_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory
   else
     cost = 0;
 
-  if(DEBUG){
-    std::cout << __FUNCTION__ << " has cost " << cost << " for lane " << trajectory[0].lane <<std::endl;
-  }
-
   return cost;
 }
 
-double buffer_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions, TrajectoryData data){
+double buffer_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
   double cost;
   double closest;
   closest = (double)data.closest_approach;
@@ -113,14 +105,10 @@ double buffer_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, m
     }
   }
 
-  if(DEBUG){
-    std::cout << __FUNCTION__ << " has cost " << cost << " for lane " << trajectory[0].lane <<std::endl;
-  }
-
   return cost;
 }
 
-double calculate_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions){
+double calculate_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions){
 
   // extra more data from the ego vehicle trajectory
   TrajectoryData trajectory_data = get_helper_data(vehicle_ptr, trajectory, predictions);
@@ -134,6 +122,11 @@ double calculate_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory
   costs.push_back(collision_cost(vehicle_ptr, trajectory, predictions, trajectory_data));
   costs.push_back(buffer_cost(vehicle_ptr, trajectory, predictions, trajectory_data));
 
+  if(DEBUG_COST){
+    std::cout << "Inefficiency cost" << " is " << costs[0] << " for lane " << trajectory[1].lane <<std::endl;
+    std::cout << "Collision cost" << " is " << costs[1] << " for lane " << trajectory[1].lane <<std::endl;
+    std::cout << "Buffer cost" << " is " << costs[1] << " for lane " << trajectory[1].lane <<std::endl;
+  }
 
   // Total cost of trajectory
   double cost = 0.0;
@@ -144,7 +137,7 @@ double calculate_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory
   return cost;
 }
 
-TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<int> > > predictions){
+TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions){
 
   // copy ego vehicle's trajectory
   vector<Vehicle::snapshot> t = trajectory;
@@ -172,7 +165,7 @@ TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> t
   last_snap = trajectory[0];
 
   // Extract only the predictions for vehicles in ego vehicle's lane
-  map<int,vector < vector<int> > > filtered = filter_predictions_by_lane(predictions, proposed_lane);
+  map<int,vector < vector<double> > > filtered = filter_predictions_by_lane(predictions, proposed_lane);
 
   // for a number of future time steps
   for(int i=1; i < PLANNING_HORIZON+1; i++) {
@@ -182,18 +175,18 @@ TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> t
     accels.push_back(snapshot.a);
 
     // for all other cars in our lane (not ego)
-    map<int, vector<vector<int> > >::iterator it = filtered.begin();
+    map<int, vector<vector<double> > >::iterator it = filtered.begin();
     while(it != filtered.end())
     {
       // first item : vehicle id
       int v_id = it->first;
       // second item : vehicle predicted trajectory
-      vector<vector<int> > predicted_traj = it->second;
+      vector<vector<double> > predicted_traj = it->second;
 
       // vehicle_state[0] = lane, vehicle_state[1] = s
       // Extract both actual and last vehicle state from the predicted trajectory
-      vector<int> vehicle_state = predicted_traj[i];
-      vector<int> last_vehicle_state = predicted_traj[i-1];
+      vector<double> vehicle_state = predicted_traj[i];
+      vector<double> last_vehicle_state = predicted_traj[i-1];
 
       // Test to see if a collision happens..
       bool vehicle_collides = check_collision(snapshot, last_vehicle_state[1], vehicle_state[1]);
@@ -248,8 +241,8 @@ TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> t
 }
 
 bool check_collision(Vehicle::snapshot snapshot, double s_previous, double s_now){
-  double s_temp = double(snapshot.s);
-  double v_temp = double(snapshot.v);
+  double s_temp = snapshot.s;
+  double v_temp = snapshot.v;
   double v_target = s_now - s_previous;
 
   // if target vehicle was behind ego vehicle
@@ -279,19 +272,19 @@ bool check_collision(Vehicle::snapshot snapshot, double s_previous, double s_now
   }
 }
 
-map<int,vector < vector<int> > > filter_predictions_by_lane(map<int,vector < vector<int> > > predictions, int lane){
-  map<int,vector < vector<int> > > filtered;
+map<int,vector < vector<double> > > filter_predictions_by_lane(map<int,vector < vector<double> > > predictions, int lane){
+  map<int,vector < vector<double> > > filtered;
 
-  map<int, vector<vector<int> > >::iterator it = predictions.begin();
+  map<int, vector<vector<double> > >::iterator it = predictions.begin();
   while(it != predictions.end())
   {
     // first item : vehicle id
     int v_id = it->first;
     // second item :
-    vector<vector<int> > predicted_traj = it->second;
+    vector<vector<double> > predicted_traj = it->second;
 
     // If first prediction's lane is == lane... and v_id isn't ego vehicle
-    if(predicted_traj[0][0] == lane && v_id != -1)
+    if(predicted_traj[0][0] == double(lane) && v_id != -1)
       filtered[v_id] = predicted_traj;
 
     it++;

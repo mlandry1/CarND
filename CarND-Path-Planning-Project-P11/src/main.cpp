@@ -15,11 +15,9 @@
 #define DELTA_T 0.02
 #define DESIRED_BUFFER 30.0  //m
 
-#define DEBUG true
-
-#define MAX_JERK     50.0    // m/s³
-#define MAX_ACCEL    10.0    // m/s²
-#define SPEED_LIMIT  49.5 //22.352  // 50 MPH in m/s
+#define MAX_JERK     50.0   // m/s³
+#define MAX_ACCEL    9.81   // m/s²
+#define SPEED_LIMIT  22.21  // 22.352m/s  // 50 MPH in m/s
 
 #define NUM_LANES    3
 
@@ -32,6 +30,8 @@ using json = nlohmann::json;
 constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
 double rad2deg(double x) { return x * 180 / pi(); }
+double mph2meter_per_s(double x) {return x/2.24;}
+double meter_per_s2mph(double x) {return x*2.24;}
 
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
@@ -184,23 +184,14 @@ int main() {
   vector<double> map_waypoints_dx;
   vector<double> map_waypoints_dy;
 
-
-  // ego vehicle starting conditions..
-  int lane = 1;
-  int s = 0;
-  double ref_vel = 0.0; //mph
-
-  // TODO: tout convertir en double ????
   // ego vehicle config
-  vector<int> ego_config = {NUM_LANES, (int)SPEED_LIMIT, (int)MAX_ACCEL};
+  vector<double> ego_config = {NUM_LANES, SPEED_LIMIT, MAX_ACCEL};
 
   // create ego vehicle object
-  Vehicle ego = Vehicle(lane, s, (int)ref_vel, 0);
+  // initialise at
+  Vehicle ego = Vehicle(1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   ego.configure(ego_config);
   ego.FSM_state = "KL";
-
-
-
 
   // Waypoint map to read from
   string map_file_ = "../data/highway_map.csv";
@@ -229,7 +220,7 @@ int main() {
   	map_waypoints_dy.push_back(d_y);
   }
 
-  h.onMessage([&lane,&ref_vel,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy]
+  h.onMessage([&ego,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy]
                (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode)
   {
     // "42" at the start of the message means there's a websocket message event.
@@ -251,13 +242,24 @@ int main() {
         {
           // j[1] is the data JSON object
           
-        	// Main car's localization Data
-          double car_x = j[1]["x"];
-          double car_y = j[1]["y"];
-          double car_s = j[1]["s"];
-          double car_d = j[1]["d"];
-          double car_yaw = j[1]["yaw"];
-          double car_speed = j[1]["speed"];
+        	// Ego vehicle localization Data
+          ego.x = j[1]["x"];              // in m
+          ego.y = j[1]["y"];              // in m
+          ego.s = j[1]["s"];              // in m
+          ego.d = j[1]["d"];              // in m
+
+          ego.yaw = deg2rad(j[1]["yaw"]);           // in rad
+          //ego.v = mph2meter_per_s(j[1]["speed"]); // in m/s
+
+
+          std::cout << "x   : " << ego.x << "m" << std::endl;
+          std::cout << "y   : " << ego.y << "m" << std::endl;
+          std::cout << "s   : " << ego.s << "m" << std::endl;
+          std::cout << "d   : " << ego.d << "m" << std::endl;
+          std::cout << "yaw : " << ego.yaw << "rad" << std::endl;
+          std::cout << "v   : " << ego.v << "m/s" << std::endl;
+          std::cout << "a   : " << ego.a << "m/s²" << std::endl<< std::endl<< std::endl;
+
 
           // Previous path data given to the Planner
           auto previous_path_x = j[1]["previous_path_x"];
@@ -272,81 +274,116 @@ int main() {
 
           json msgJson;
 
+//***************************************************************************************
+
+          // create Vehicles list
+          map<int, Vehicle> vehicles;
+
+          // insert ego vehicle in the Vehicles list
+          vehicles.insert(std::pair<int,Vehicle>(-1,ego));
+
+          // for every vehicles on the road.. create vehicles objects
+          for(int i = 0; i < sensor_fusion.size(); i++)
+          {
+            int   v_id = sensor_fusion[i][0];
+            double   x = sensor_fusion[i][1];   // in m
+            double   y = sensor_fusion[i][2];   // in m
+            double  vx = sensor_fusion[i][3];   // in m/s
+            double  vy = sensor_fusion[i][4];   // in m/s
+
+            double   s = sensor_fusion[i][5];   // in m
+            double   d = sensor_fusion[i][6];   // in m
+
+            double yaw = atan2(vy,vx);          // in rad
+            double   v = sqrt(vx*vx+vy*vy);     // in m/s
+
+            int lane = int(d/4);
+
+            // create vehicle object here
+            Vehicle vehicle = Vehicle(lane, x, y, s, d, v, yaw, 0.0);
+
+            vehicles.insert(std::pair<int,Vehicle>(v_id,vehicle));
+          }
+
+          /*create predictions list
+          The keys are ids of other vehicles and the values are arrays
+          where each entry corresponds to the vehicle's predicted location at the
+          corresponding timestep. The FIRST element in the array gives the vehicle's
+          current position. Example (showing a car with id 3 moving at 2 m/s):
+
+          {
+            3 : [
+              {"s" : 4, "lane": 0},
+              {"s" : 6, "lane": 0},
+              {"s" : 8, "lane": 0},
+              {"s" : 10, "lane":
+            ]
+          }
+          */
+
+          map<int ,vector<vector<double> > > predictions;
+
+          // for every vehicles on the road.. generate predictions
+          map<int, Vehicle>::iterator it = vehicles.begin();
+            while(it != vehicles.end()) {
+                int v_id = it->first;
+                // predictions for all vehicles on the road, assuming constant acceleration and no lane change
+                vector<vector<double> > preds = it->second.generate_predictions(10);
+                predictions[v_id] = preds;
+                it++;
+            }
+
+
+
+
+          // ego vehicle update FSM state
+          ego.update_FSM_state(predictions, end_path_s);
+
+          // ego vehicle realize FSM state
+          ego.realize_FSM_state(predictions, end_path_s);
+
+          /*****************************************************************************************************/
+
+
           /*
            Define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
            */
 
           // If we have leftover points from the previous path given to the simulator
           int prev_size = previous_path_x.size();
-          if(prev_size >0)
+          if(prev_size >0 )
           {
             // let's modify our current car position and take it to the last position of the previous path
-            car_s = end_path_s;
+            ego.s = end_path_s;
           }
 
-          bool too_close = false;
 
-          // for all vehicle in sensor fusion vector
-          for(int i = 0; i < sensor_fusion.size(); i++)
-          {
-            //car is in my lane
-            float d = sensor_fusion[i][6];
+          // update ego speed
+          ego.v += ego.a * DELTA_T;
 
-            double center_ego_lane = (2+4*lane);
-            if(d < (center_ego_lane + 2) && d > (center_ego_lane - 2))
-            {
-              double vx = sensor_fusion[i][3];
-              double vy = sensor_fusion[i][4];
-              double check_speed = sqrt(vx*vx+vy*vy);
-              double check_car_s = sensor_fusion[i][5];
-
-              //if using previous points we predict the car s value in the future
-              check_car_s+=((double)prev_size*DELTA_T*check_speed);
-
-              // If the car is in front of ego vehicle closer than s gap
-              if((check_car_s > car_s) && ((check_car_s-car_s) < DESIRED_BUFFER))
-              {
-                too_close = true;
-                if(lane > 0)
-                {
-                  lane=0;
-                }
-              }
-            }
-          }
-
-          if(too_close)
-          {
-            ref_vel -= MAX_ACCEL * DELTA_T;
-          }
-          else if(ref_vel < SPEED_LIMIT)
-          {
-            ref_vel += MAX_ACCEL * DELTA_T;;
-          }
-
-          // Create a list of widely spaced (x,y) waypoints, evenly spaced at 30m
+          // Create a list of widely spaced (x,y) waypoints, evenly spaced at 30m (1.34s @ 50MPH)
           // Later we will interpolate these waypoints with a spline and fill it in with more points that control speed
           vector<double> ptsx;
           vector<double> ptsy;
 
           // reference x,y, yaw states
-          // either we will reference the starting point as where the car is or at the previous paths and point
-          double ref_x = car_x;
-          double ref_y = car_y;
-          double ref_yaw = deg2rad(car_yaw);
+          // either we will reference the starting point as where the car is or at the previous paths end point
+          double ref_x = ego.x;
+          double ref_y = ego.y;
+          double ref_yaw = ego.yaw;
 
           // if previous size is almost empty, use the car as starting reference
           if(prev_size <2)
           {
             //Use two points that make the path tangent to the car
-            double prev_car_x = car_x - cos(car_yaw);
-            double prev_car_y = car_y - sin(car_yaw);
+            double prev_car_x = ref_x - cos(ref_yaw);
+            double prev_car_y = ref_y - sin(ref_yaw);
 
             ptsx.push_back(prev_car_x);
-            ptsx.push_back(car_x);
+            ptsx.push_back(ego.x);
 
             ptsy.push_back(prev_car_y);
-            ptsy.push_back(car_y);
+            ptsy.push_back(ego.y);
           }
           // use the previous path's end point as starting reference
           else
@@ -368,9 +405,9 @@ int main() {
           }
 
           // In Frenet add evenly 30m spaced points ahead of the starting reference
-          vector<double> next_wp0 = getXY(car_s+30,(2+4*lane),map_waypoints_s,map_waypoints_x,map_waypoints_y);
-          vector<double> next_wp1 = getXY(car_s+60,(2+4*lane),map_waypoints_s,map_waypoints_x,map_waypoints_y);
-          vector<double> next_wp2 = getXY(car_s+90,(2+4*lane),map_waypoints_s,map_waypoints_x,map_waypoints_y);
+          vector<double> next_wp0 = getXY(ego.s+30,(2+4*ego.lane),map_waypoints_s,map_waypoints_x,map_waypoints_y);
+          vector<double> next_wp1 = getXY(ego.s+60,(2+4*ego.lane),map_waypoints_s,map_waypoints_x,map_waypoints_y);
+          vector<double> next_wp2 = getXY(ego.s+90,(2+4*ego.lane),map_waypoints_s,map_waypoints_x,map_waypoints_y);
 
           ptsx.push_back(next_wp0[0]);
           ptsx.push_back(next_wp1[0]);
@@ -387,6 +424,7 @@ int main() {
             double shift_x = ptsx[i]-ref_x;
             double shift_y = ptsy[i]-ref_y;
 
+            // previous points are negative x..
             ptsx[i] = (shift_x *cos(0-ref_yaw)-shift_y*sin(0-ref_yaw));
             ptsy[i] = (shift_x *sin(0-ref_yaw)+shift_y*cos(0-ref_yaw));
           }
@@ -409,20 +447,24 @@ int main() {
           }
 
           // Calculate how to break up spline points so that we travel at our desired reference velocity
+          // look 30m into the future (1.34s @ 50MPH)
           double target_x = 30.0;
           double target_y = s(target_x); // s : spline
-          double target_dist = sqrt(target_x*target_x + target_y*target_y);
+          double target_dist = sqrt(target_x*target_x + target_y*target_y); // in m
 
-          double x_add_on = 0;
+          // Previous x point..
+          double x_prev = 0;
 
-          // Fill up the rest of our path panner after filling it with previous points, here we will always ouput 50 points
+          // Fill up the rest of our path panner after filling it with previous points
+          // here we will always ouput 50 points (i.e. 1s of trajectory)
           for(int i = 1; i <= 50 - previous_path_x.size(); i++)
           {
-            double N = (target_dist/(.02*ref_vel/2.24)); // ref_vel in mph
-            double x_point = x_add_on+(target_x)/N;
+            // Number of point between ref and target needed to travel at desired speed given the 0.02s sampling period
+            double N = (target_dist/(DELTA_T*ego.v));
+            double x_point = x_prev+(target_x)/N;
             double y_point = s(x_point);
 
-            x_add_on = x_point;
+            x_prev = x_point;
 
             double x_ref = x_point;
             double y_ref = y_point;

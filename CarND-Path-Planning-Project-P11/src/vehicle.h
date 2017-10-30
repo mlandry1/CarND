@@ -26,83 +26,82 @@ public:
   };
 
   struct snapshot{
-
-    int lane;           // lane number
-    int s;              // distance (frenet coordinate)
-    int v;              // actual speed
-    int a;              // actual acceleration
-    string FSM_state;   // actual FSM state (Keep Lane, Lane Change Right/Left, Prepare For Lane Change Right/Left)
-
+    int lane;         // lane number
+    double s;         // distance (frenet coordinate)
+    double v;         // actual speed
+    double a;         // actual acceleration
+    string FSM_state; // actual FSM state (Keep Lane, Lane Change Right/Left, Prepare For Lane Change Right/Left)
   };
 
+  int lane;       // lane number
+
+  // World coordinates
+  double x;       // x world coordinate       in m
+  double y;       // y world coordinate       in m
+
+  // Frenet coordinates
+  double s;       // distance along the road  in m
+  double d;       // distance across the road in m
+
+  double v;       // actual vehicle speed     in m/s
+  double yaw;     // actual vehicle heading   in rad
+  double a;       // actual acceleration      in m/s²
+
+  // ego vehicle variables only..
+  string FSM_state;               // actual FSM state (Keep Lane, Lane Change Right/Left, Prepare For Lane Change Right/Left)
   int L = 1;
+  double preferred_buffer = 6;   // impacts "keep lane" behavior.
 
-  int preferred_buffer = 6; // impacts "keep lane" behavior.
-
-  int lane;
-
-  int s;
-
-  int v;
-
-  int a;
-
-  int target_speed;
-
-  int lanes_available;
-
-  int max_acceleration;
-
-  string FSM_state;
+  double target_speed = -1;
+  int lanes_available = -1;
+  double max_acceleration = -1;
 
   /**
   * Constructor
   */
-  Vehicle(int lane, int s, int v, int a);
+  Vehicle(int lane, double x, double y, double s, double d, double v, double yaw, double a);
 
   /**
   * Destructor
   */
   virtual ~Vehicle();
 
-  void update_FSM_state(map<int, vector <vector<int> > > predictions);
+  void update_FSM_state(map<int, vector < vector<double> > > predictions, double end_path_s);
 
   /*******/
 
-  string _get_next_FSM_state(map<int,vector < vector<int> > > predictions);
+  string _get_next_FSM_state(map<int,vector < vector<double> > > predictions, double end_path_s);
 
   snapshot get_snapshot(void);
 
-  vector<snapshot> _trajectory_for_FSM_state(string FSM_state, map<int,vector < vector<int> > > predictions, int horizon);
+  vector<snapshot> _trajectory_for_FSM_state(string FSM_state, map<int,vector < vector<double> > > predictions, double end_path_s, int horizon);
 
   void restore_state_from_snapshot(snapshot snapshot_temp);
   /*******/
 
-  void configure(vector<int> road_data);
+  void configure(vector<double> road_data);
 
-  string display();
+  void increment(double);
 
-  void increment(int dt);
-
-  vector<int> state_at(int t);
+  vector<double> state_at(double t);
 
   bool collides_with(Vehicle other, int at_time);
 
   collider will_collide_with(Vehicle other, int timesteps);
 
-  void realize_FSM_state(map<int, vector < vector<int> > > predictions);
+  void realize_FSM_state(map<int, vector < vector<double> > > predictions, double end_path_s);
 
   void realize_constant_speed();
 
-  int _max_accel_for_lane(map<int,vector<vector<int> > > predictions, int lane, int s);
+  double _max_accel_for_lane(map<int,vector < vector<double> > > predictions, int lane, double s, double end_path_s);
 
-  void realize_keep_lane(map<int, vector< vector<int> > > predictions);
+  void realize_keep_lane(map<int,vector < vector<double> > > predictions, double end_path_s);
 
-  void realize_lane_change(map<int,vector< vector<int> > > predictions, string direction);
+  void realize_lane_change(map<int,vector < vector<double> > > predictions, string direction, double end_path_s);
 
-  void realize_prep_lane_change(map<int,vector< vector<int> > > predictions, string direction);
+  void realize_prep_lane_change(map<int,vector < vector<double> > > predictions, string direction, double end_path_s);
 
-  vector<vector<int> > generate_predictions(int horizon);
+  vector<vector<double> > generate_predictions(int horizon);
 
 };
 

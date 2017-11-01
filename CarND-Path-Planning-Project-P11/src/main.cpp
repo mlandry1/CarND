@@ -14,6 +14,7 @@
 
 #define DELTA_T 0.02
 #define DESIRED_BUFFER 30.0  //m
+#define DEBUG true
 
 #define MAX_JERK     50.0   // m/s³
 #define MAX_ACCEL    9.81   // m/s²
@@ -253,17 +254,6 @@ int main() {
           ego.d = j[1]["d"];              // in m
 
           ego.yaw = deg2rad(j[1]["yaw"]);           // in rad
-          //ego.v = mph2meter_per_s(j[1]["speed"]); // in m/s
-
-
-//          std::cout << "x   : " << ego.x << "m" << std::endl;
-//          std::cout << "y   : " << ego.y << "m" << std::endl;
-//          std::cout << "s   : " << ego.s << "m" << std::endl;
-//          std::cout << "d   : " << ego.d << "m" << std::endl;
-//          std::cout << "yaw : " << ego.yaw << "rad" << std::endl;
-//          std::cout << "v   : " << ego.v << "m/s" << std::endl;
-//          std::cout << "a   : " << ego.a << "m/s²" << std::endl<< std::endl<< std::endl;
-
 
           // Previous path data given to the Planner
           auto previous_path_x = j[1]["previous_path_x"];
@@ -278,8 +268,7 @@ int main() {
 
           json msgJson;
 
-//***************************************************************************************
-
+          //********************************************************************************
           // create Vehicles list
           map<int, Vehicle> vehicles;
 
@@ -309,22 +298,7 @@ int main() {
             vehicles.insert(std::pair<int,Vehicle>(v_id,vehicle));
           }
 
-          /*create predictions list
-          The keys are ids of other vehicles and the values are arrays
-          where each entry corresponds to the vehicle's predicted location at the
-          corresponding timestep. The FIRST element in the array gives the vehicle's
-          current position. Example (showing a car with id 3 moving at 2 m/s):
-
-          {
-            3 : [
-              {"s" : 4, "lane": 0},
-              {"s" : 6, "lane": 0},
-              {"s" : 8, "lane": 0},
-              {"s" : 10, "lane":
-            ]
-          }
-          */
-
+          //create predictions list
           map<int ,vector<vector<double> > > predictions;
 
           // for every vehicles on the road.. generate predictions
@@ -337,15 +311,33 @@ int main() {
                 it++;
             }
 
-//          ego.path_update_delay = prev_size * DELTA_T;
+          // clear the screen
+          if(DEBUG){
+            std::system("clear");
+          }
 
           // ego vehicle update FSM state
           ego.update_FSM_state(predictions);
 
+          // take into account the actual refresh rate
+          t_now = std::chrono::high_resolution_clock::now();
+          double delta_t = std::chrono::duration_cast<std::chrono::nanoseconds>( t_now - t_now_1).count();
+          t_now_1 = t_now;
+          delta_t = delta_t/1E9;
+          if(delta_t > 5*DELTA_T)
+            delta_t = 5*DELTA_T;
 
-          std::cout << std::endl << "Realize STATE" << std::endl;
+          if(DEBUG){
+            std::cout << std::string(100, '*') << "\n\n" <<
+                std::string(100, '*') << "\n" <<
+                "--" << ego.FSM_state << "--" <<
+                "\tLane\t"<< ego.lane <<
+                "\tdelta_t\t: " << delta_t << " s\n" <<
+                std::string(100, '*') << "\n" << std::endl;
+          }
+
           // ego vehicle realize FSM state
-          ego.realize_FSM_state(predictions);
+          ego.realize_FSM_state(predictions, true);
 
           /*****************************************************************************************************/
           /*
@@ -361,19 +353,8 @@ int main() {
             ego.s = ego.end_path_s;
           }
 
-//          std::cout << std::endl << "left over points: " << prev_size << std::endl<< std::endl;
-
-          // take into account the actual refresh rate
-          t_now = std::chrono::high_resolution_clock::now();
-          double delta_t = std::chrono::duration_cast<std::chrono::nanoseconds>( t_now - t_now_1).count();
-          delta_t = delta_t/1E9;
           // update ego speed to obtain ego.a over the trajectory to be generated
-          if(delta_t > 5*DELTA_T)
-            delta_t = 5*DELTA_T;
-
           ego.v += ego.a * (delta_t);
-          std::cout << "delta_t   : " << delta_t << "s" << std::endl;
-          t_now_1 = t_now;
 
           // Create a list of widely spaced (x,y) waypoints, evenly spaced at 30m (1.34s @ 50MPH)
           // Later we will interpolate these waypoints with a spline and fill it in with more points that control speed

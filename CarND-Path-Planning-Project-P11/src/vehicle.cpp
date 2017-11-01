@@ -122,10 +122,6 @@ void Vehicle::update_FSM_state(map<int,vector < vector<double> > > predictions) 
   //TODO remove this
 //  _FSM_state = "KL";
 
-  std::cout << std::endl << "**************************************************" << std::endl;
-  std::cout << " Next FSM_state is " << _FSM_state << std::endl;
-  std::cout << "**************************************************" << std::endl << std::endl;
-
   this->FSM_state = _FSM_state;
 }
 
@@ -151,6 +147,12 @@ string Vehicle::_get_next_FSM_state(map<int,vector < vector<double> > > predicti
   vector<cost_t> costs;
   map<int,vector < vector<double> > > predictions_copy;
   vector<Vehicle::snapshot> trajectory;
+
+  if(DEBUG_VEHICLE){
+    std::cout << std::string(100, '*') <<
+        "\nGenerate trajectories for each possible FSM state\n" <<
+        std::string(100, '*') << std::endl;
+  }
   // for each possible FSM_state
   for(int i=0; i<FSM_states.size(); i++){
     // refresh the predictions
@@ -159,13 +161,12 @@ string Vehicle::_get_next_FSM_state(map<int,vector < vector<double> > > predicti
     // compute the ego vehicle trajectory for a given FSM state for the 5 next seconds..
     trajectory = this->_trajectory_for_FSM_state(FSM_states[i], predictions_copy, 5);
 
+    if(DEBUG_VEHICLE){
+      std::cout << "--" << FSM_states[i] << "--\tLane\t" << trajectory[1].lane;
+    }
     // compute the cost of the ego vehicle trajectory and note the associated FSM state
     cost.cost = calculate_cost(this, trajectory, predictions);
     cost.FSM_state = FSM_states[i];
-    if(DEBUG_VEHICLE){
-      std::cout << "Total cost of " << FSM_states[i] << " is " << cost.cost << std::endl << std::endl;
-    }
-
     costs.push_back(cost);
   }
 
@@ -183,7 +184,7 @@ string Vehicle::_get_next_FSM_state(map<int,vector < vector<double> > > predicti
   return best_FSM_state;
 }
 
-void Vehicle::realize_FSM_state(map<int,vector < vector<double> > > predictions) {
+void Vehicle::realize_FSM_state(map<int,vector < vector<double> > > predictions, bool verbose) {
 
   /*
   Given a state, realize it by adjusting acceleration and lane.
@@ -196,23 +197,23 @@ void Vehicle::realize_FSM_state(map<int,vector < vector<double> > > predictions)
   }
   else if(FSM_state.compare("KL") == 0)
   {
-    realize_keep_lane(predictions);
+    realize_keep_lane(predictions, verbose);
   }
   else if(FSM_state.compare("LCL") == 0)
   {
-    realize_lane_change(predictions, "L");
+    realize_lane_change(predictions, "L", verbose);
   }
   else if(FSM_state.compare("LCR") == 0)
   {
-    realize_lane_change(predictions, "R");
+    realize_lane_change(predictions, "R", verbose);
   }
   else if(FSM_state.compare("PLCL") == 0)
   {
-    realize_prep_lane_change(predictions, "L");
+    realize_prep_lane_change(predictions, "L",verbose);
   }
   else if(FSM_state.compare("PLCR") == 0)
   {
-    realize_prep_lane_change(predictions, "R");
+    realize_prep_lane_change(predictions, "R", verbose);
   }
 
 }
@@ -221,18 +222,18 @@ void Vehicle::realize_constant_speed() {
   a = 0;
 }
 
-void Vehicle::realize_keep_lane(map<int,vector < vector<double> > > predictions) {
-  this->a = _max_accel_for_lane(predictions, this->lane, this->s, this->end_path_s);
+void Vehicle::realize_keep_lane(map<int,vector < vector<double> > > predictions, bool verbose) {
+  this->a = _max_accel_for_lane(predictions, this->lane, this->s, this->end_path_s, verbose);
 }
 
-void Vehicle::realize_lane_change(map<int,vector < vector<double> > > predictions, string direction) {
+void Vehicle::realize_lane_change(map<int,vector < vector<double> > > predictions, string direction, bool verbose) {
   int delta = -1;
   if (direction.compare("R") == 0)
   {
     delta = 1;
   }
   this->lane += delta;
-  this->a = _max_accel_for_lane(predictions, this->lane, this->s, this->end_path_s);
+  this->a = _max_accel_for_lane(predictions, this->lane, this->s, this->end_path_s, verbose);
 }
 
 vector<double> Vehicle::state_at(double t) {
@@ -272,7 +273,7 @@ vector<Vehicle::snapshot> Vehicle::_trajectory_for_FSM_state(string FSM_state, m
     // FSM state
 //    this->FSM_state = FSM_state;
     // realize FSM state (gives the lane and the acceleration for the timestep)
-    this->realize_FSM_state(predictions);
+    this->realize_FSM_state(predictions, false);
     //ensure the vehicle is still in an existing lane..
     assert(0 <= this->lane && this->lane < this->lanes_available);
     // increment simulation
@@ -299,7 +300,7 @@ vector<Vehicle::snapshot> Vehicle::_trajectory_for_FSM_state(string FSM_state, m
 }
 
 // TODO: enlever end_path_s des arguments??
-double Vehicle::_max_accel_for_lane(map<int,vector < vector<double> > > predictions, int lane, double s, double end_path_s) {
+double Vehicle::_max_accel_for_lane(map<int,vector < vector<double> > > predictions, int lane, double s, double end_path_s, bool verbose) {
 
   double delta_v_til_target = this->target_speed - this->v;
   // either max_acceleration, or delta_v over 1s..
@@ -341,7 +342,6 @@ double Vehicle::_max_accel_for_lane(map<int,vector < vector<double> > > predicti
     // car in front next position
     double next_pos = leading[1][1];
     // ego next position
-    // TODO: end_path_s au lieu de s?
     double my_next = s + this->v * 1.0 + this->a * 1.0 * 1.0 / 2;
     // supposed to be positive !
     double separation_next = next_pos - my_next;
@@ -352,19 +352,18 @@ double Vehicle::_max_accel_for_lane(map<int,vector < vector<double> > > predicti
     // negative saturation
     max_acc = max(max_acc, -this->max_acceleration);
 
-    if(DEBUG_VEHICLE){
-      std::cout << std::endl << "Lane  : " << lane << std::endl;
-      std::cout << "separation_next  : " << separation_next << "m" << std::endl;
-      std::cout << "available_room   : " << available_room << "m" << std::endl;
-      std::cout << "actual speed     : " << this->v << "m/s" << std::endl;
-      std::cout << "max accel        : " << max_acc << "m/s²" << std::endl<< std::endl<< std::endl;
+    if(verbose){
+      std::cout << "Looking in lane  : " << lane << std::endl;
+      std::cout << "Available_room   : " << available_room << "m" << std::endl;
+      std::cout << "Actual speed     : " << this->v << "m/s" << std::endl;
+      std::cout << "Accel cmd        : " << max_acc << "m/s²" << std::endl<< std::endl<< std::endl;
     }
   }
 
   return max_acc;
 }
 
-void Vehicle::realize_prep_lane_change(map<int,vector < vector<double> > > predictions, string direction) {
+void Vehicle::realize_prep_lane_change(map<int,vector < vector<double> > > predictions, string direction, bool verbose) {
   //TODO: inclure une référence à ça ? this->end_path_s
 
   int delta = -1;

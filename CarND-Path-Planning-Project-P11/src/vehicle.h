@@ -95,17 +95,17 @@ public:
 
   collider will_collide_with(Vehicle other, int timesteps);
 
-  void realize_FSM_state(map<int, vector < vector<double> > > predictions);
+  void realize_FSM_state(map<int, vector < vector<double> > > predictions, bool verbose);
 
   void realize_constant_speed();
 
-  double _max_accel_for_lane(map<int,vector < vector<double> > > predictions, int lane, double s, double end_path_s);
+  double _max_accel_for_lane(map<int,vector < vector<double> > > predictions, int lane, double s, double end_path_s, bool verbose);
 
-  void realize_keep_lane(map<int,vector < vector<double> > > predictions);
+  void realize_keep_lane(map<int,vector < vector<double> > > predictions, bool verbose);
 
-  void realize_lane_change(map<int,vector < vector<double> > > predictions, string direction);
+  void realize_lane_change(map<int,vector < vector<double> > > predictions, string direction, bool verbose);
 
-  void realize_prep_lane_change(map<int,vector < vector<double> > > predictions, string direction);
+  void realize_prep_lane_change(map<int,vector < vector<double> > > predictions, string direction, bool verbose);
 
   vector<vector<double> > generate_predictions(int horizon);
 

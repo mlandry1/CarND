@@ -13,32 +13,13 @@
 // priority levels for costs
 #define COLLISION  10000000
 #define DANGER     1000000
-//#define REACH_GOAL 1000000
 #define COMFORT    0
 #define EFFICIENCY 1000
 
 #define PLANNING_HORIZON  2
-#define DESIRED_BUFFER    1.5 // timestep
+#define DESIRED_BUFFER2   1.5 // timestep
 
 #define DEBUG_COST true
-
-//double distance_from_goal_lane(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
-//
-//  // Penalizes lane distance vs time to change lane
-//
-//  double distance = double(abs(data.end_distance_to_goal));
-//  distance = max(distance, 1.0);
-//  double time_to_goal = distance / data.avg_speed;
-//  double lanes = double(data.end_lanes_from_goal);
-//  double multiplier = 5 * lanes / time_to_goal;
-//  double cost = multiplier * REACH_GOAL;
-//
-//  if(DEBUG_COST){
-//    std::cout << __FUNCTION__ << " has cost " << cost << " for lane " << trajectory[0].lane <<std::endl;
-//  }
-//
-//  return cost;
-//}
 
 double change_lane_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
 
@@ -94,10 +75,10 @@ double buffer_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, m
     cost = 10 * DANGER;
   else {
     double timesteps_away = closest / abs(data.avg_speed);
-    if(timesteps_away > DESIRED_BUFFER)
+    if(timesteps_away > DESIRED_BUFFER2)
       cost = 0.0;
     else {
-      double multiplier = 1.0 - pow(timesteps_away/DESIRED_BUFFER,2);
+      double multiplier = 1.0 - pow(timesteps_away/DESIRED_BUFFER2,2);
       cost = multiplier * DANGER;
     }
   }
@@ -113,24 +94,22 @@ double calculate_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory
   vector <double> costs;
 
   // cost functions evaluation
-//  costs.push_back(vehicle_ptr, distance_from_goal_lane(trajectory, predictions, trajectory_data));
   costs.push_back(change_lane_cost(vehicle_ptr, trajectory, predictions, trajectory_data));
   costs.push_back(inefficiency_cost(vehicle_ptr, trajectory, predictions, trajectory_data));
   costs.push_back(collision_cost(vehicle_ptr, trajectory, predictions, trajectory_data));
   costs.push_back(buffer_cost(vehicle_ptr, trajectory, predictions, trajectory_data));
 
-  if(DEBUG_COST){
-    std::cout << std::endl <<" Lane " << trajectory[1].lane << std::endl;
-    std::cout << "Change Lane cost" << " is " << costs[0] << std::endl;
-    std::cout << "Inefficiency cost" << " is " << costs[1] << std::endl;
-    std::cout << "Collision cost" << " is " << costs[2] << std::endl;
-    std::cout << "Buffer cost" << " is " << costs[3] << std::endl;
-  }
-
   // Total cost of trajectory
   double cost = 0.0;
   for(int i=0; i<costs.size(); i++){
     cost += costs[i];
+  }
+
+  if(DEBUG_COST){
+    printf("\tChange Lane cost\t%+8.0f\tInefficiency cost\t%+8.0f"
+        "\n\t\t\tCollision cost\t\t%+8.0f\tBuffer cost\t\t%+8.0f"
+        "\n\t\t\t\t\t\t\t\tTOTAL ----------------->%+8.0f\n\n",
+        costs[0],costs[1],costs[2],costs[3],cost);
   }
 
   return cost;

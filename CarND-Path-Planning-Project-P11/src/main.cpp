@@ -20,6 +20,7 @@
 #define SPEED_LIMIT  22.21  // 22.352m/s  // 50 MPH in m/s
 
 #define NUM_LANES    3
+#define NUM_PATH_POINTS 50
 
 using namespace std;
 
@@ -184,6 +185,9 @@ int main() {
   vector<double> map_waypoints_dx;
   vector<double> map_waypoints_dy;
 
+  std::chrono::high_resolution_clock::time_point t_now = std::chrono::high_resolution_clock::now();
+  std::chrono::high_resolution_clock::time_point t_now_1 = t_now;
+
   // ego vehicle config
   vector<double> ego_config = {NUM_LANES, SPEED_LIMIT, MAX_ACCEL};
 
@@ -220,7 +224,7 @@ int main() {
   	map_waypoints_dy.push_back(d_y);
   }
 
-  h.onMessage([&ego,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy]
+  h.onMessage([&ego,&t_now,&t_now_1,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy]
                (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode)
   {
     // "42" at the start of the message means there's a websocket message event.
@@ -252,13 +256,13 @@ int main() {
           //ego.v = mph2meter_per_s(j[1]["speed"]); // in m/s
 
 
-          std::cout << "x   : " << ego.x << "m" << std::endl;
-          std::cout << "y   : " << ego.y << "m" << std::endl;
-          std::cout << "s   : " << ego.s << "m" << std::endl;
-          std::cout << "d   : " << ego.d << "m" << std::endl;
-          std::cout << "yaw : " << ego.yaw << "rad" << std::endl;
-          std::cout << "v   : " << ego.v << "m/s" << std::endl;
-          std::cout << "a   : " << ego.a << "m/s²" << std::endl<< std::endl<< std::endl;
+//          std::cout << "x   : " << ego.x << "m" << std::endl;
+//          std::cout << "y   : " << ego.y << "m" << std::endl;
+//          std::cout << "s   : " << ego.s << "m" << std::endl;
+//          std::cout << "d   : " << ego.d << "m" << std::endl;
+//          std::cout << "yaw : " << ego.yaw << "rad" << std::endl;
+//          std::cout << "v   : " << ego.v << "m/s" << std::endl;
+//          std::cout << "a   : " << ego.a << "m/s²" << std::endl<< std::endl<< std::endl;
 
 
           // Previous path data given to the Planner
@@ -266,8 +270,8 @@ int main() {
           auto previous_path_y = j[1]["previous_path_y"];
 
           // Previous path's end s and d values
-          double end_path_s = j[1]["end_path_s"];
-          double end_path_d = j[1]["end_path_d"];
+          ego.end_path_s = j[1]["end_path_s"];
+          ego.end_path_d = j[1]["end_path_d"];
 
           // Sensor Fusion Data, a list of all other cars on the same side of the road.
           auto sensor_fusion = j[1]["sensor_fusion"];
@@ -333,33 +337,43 @@ int main() {
                 it++;
             }
 
-
-
+//          ego.path_update_delay = prev_size * DELTA_T;
 
           // ego vehicle update FSM state
-          ego.update_FSM_state(predictions, end_path_s);
+          ego.update_FSM_state(predictions);
 
+
+          std::cout << std::endl << "Realize STATE" << std::endl;
           // ego vehicle realize FSM state
-          ego.realize_FSM_state(predictions, end_path_s);
+          ego.realize_FSM_state(predictions);
 
           /*****************************************************************************************************/
-
-
           /*
            Define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
            */
 
-          // If we have leftover points from the previous path given to the simulator
+          // Previous path size
           int prev_size = previous_path_x.size();
+          // If we have leftover points from the previous path given to the simulator
           if(prev_size >0 )
           {
             // let's modify our current car position and take it to the last position of the previous path
-            ego.s = end_path_s;
+            ego.s = ego.end_path_s;
           }
 
+//          std::cout << std::endl << "left over points: " << prev_size << std::endl<< std::endl;
 
-          // update ego speed
-          ego.v += ego.a * DELTA_T;
+          // take into account the actual refresh rate
+          t_now = std::chrono::high_resolution_clock::now();
+          double delta_t = std::chrono::duration_cast<std::chrono::nanoseconds>( t_now - t_now_1).count();
+          delta_t = delta_t/1E9;
+          // update ego speed to obtain ego.a over the trajectory to be generated
+          if(delta_t > 5*DELTA_T)
+            delta_t = 5*DELTA_T;
+
+          ego.v += ego.a * (delta_t);
+          std::cout << "delta_t   : " << delta_t << "s" << std::endl;
+          t_now_1 = t_now;
 
           // Create a list of widely spaced (x,y) waypoints, evenly spaced at 30m (1.34s @ 50MPH)
           // Later we will interpolate these waypoints with a spline and fill it in with more points that control speed
@@ -456,8 +470,8 @@ int main() {
           double x_prev = 0;
 
           // Fill up the rest of our path panner after filling it with previous points
-          // here we will always ouput 50 points (i.e. 1s of trajectory)
-          for(int i = 1; i <= 50 - previous_path_x.size(); i++)
+          // here we will always output 50 points (i.e. 1s of trajectory)
+          for(int i = 1; i <= NUM_PATH_POINTS - previous_path_x.size(); i++)
           {
             // Number of point between ref and target needed to travel at desired speed given the 0.02s sampling period
             double N = (target_dist/(DELTA_T*ego.v));

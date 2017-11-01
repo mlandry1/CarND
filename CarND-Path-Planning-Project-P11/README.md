@@ -67,7 +67,7 @@ A really helpful resource for doing this project and creating smooth trajectorie
 ---
 
 ## Dependencies
-
+* `sudo apt-get install ncurses-dev`
 * cmake >= 3.5
  * All OSes: [click here for installation instructions](https://cmake.org/install/)
 * make >= 4.1

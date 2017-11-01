@@ -13,8 +13,8 @@
 // priority levels for costs
 #define COLLISION  10000000
 #define DANGER     1000000
-#define REACH_GOAL 1000000
-#define COMFORT    100000
+//#define REACH_GOAL 1000000
+#define COMFORT    0
 #define EFFICIENCY 1000
 
 #define PLANNING_HORIZON  2
@@ -22,26 +22,6 @@
 
 #define DEBUG_COST true
 
-//double change_lane_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
-//
-//  // Penalizes lane changes AWAY from the goal lane and rewards
-//  // lane changes TOWARDS the goal lane.
-//
-//  int proposed_lanes = data.end_lanes_from_goal;
-//  int cur_lanes = trajectory[0].lane;
-//  double cost = 0.0;
-//  if (proposed_lanes > cur_lanes)
-//    cost = COMFORT;
-//  if (proposed_lanes < cur_lanes)
-//    cost = -COMFORT;
-//
-//  if(DEBUG_COST){
-//    std::cout << __FUNCTION__ << " has cost " << cost << " for lane " << trajectory[0].lane <<std::endl<<std::endl;
-//  }
-//
-//  return cost;
-//}
-//
 //double distance_from_goal_lane(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
 //
 //  // Penalizes lane distance vs time to change lane
@@ -59,6 +39,21 @@
 //
 //  return cost;
 //}
+
+double change_lane_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
+
+  // Penalizes lane changes
+
+  int proposed_lanes = data.end_lanes_from_goal;
+  int cur_lanes = trajectory[0].lane - vehicle_ptr->goal_lane;
+  double cost = 0.0;
+  if (proposed_lanes > cur_lanes)
+    cost = COMFORT;
+  if (proposed_lanes < cur_lanes)
+    cost = -COMFORT;
+
+  return cost;
+}
 
 double inefficiency_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
 
@@ -90,13 +85,15 @@ double collision_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory
 }
 
 double buffer_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
+  // Penalizes a short distance between ego vehicle and closest vehicle in front
+
   double cost;
   double closest;
   closest = (double)data.closest_approach;
   if (closest == 0.0)
     cost = 10 * DANGER;
   else {
-    double timesteps_away = closest / data.avg_speed;
+    double timesteps_away = closest / abs(data.avg_speed);
     if(timesteps_away > DESIRED_BUFFER)
       cost = 0.0;
     else {
@@ -117,15 +114,17 @@ double calculate_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory
 
   // cost functions evaluation
 //  costs.push_back(vehicle_ptr, distance_from_goal_lane(trajectory, predictions, trajectory_data));
-//  costs.push_back(vehicle_ptr, change_lane_cost(trajectory, predictions, trajectory_data));
+  costs.push_back(change_lane_cost(vehicle_ptr, trajectory, predictions, trajectory_data));
   costs.push_back(inefficiency_cost(vehicle_ptr, trajectory, predictions, trajectory_data));
   costs.push_back(collision_cost(vehicle_ptr, trajectory, predictions, trajectory_data));
   costs.push_back(buffer_cost(vehicle_ptr, trajectory, predictions, trajectory_data));
 
   if(DEBUG_COST){
-    std::cout << "Inefficiency cost" << " is " << costs[0] << " for lane " << trajectory[1].lane <<std::endl;
-    std::cout << "Collision cost" << " is " << costs[1] << " for lane " << trajectory[1].lane <<std::endl;
-    std::cout << "Buffer cost" << " is " << costs[1] << " for lane " << trajectory[1].lane <<std::endl;
+    std::cout << std::endl <<" Lane " << trajectory[1].lane << std::endl;
+    std::cout << "Change Lane cost" << " is " << costs[0] << std::endl;
+    std::cout << "Inefficiency cost" << " is " << costs[1] << std::endl;
+    std::cout << "Collision cost" << " is " << costs[2] << std::endl;
+    std::cout << "Buffer cost" << " is " << costs[3] << std::endl;
   }
 
   // Total cost of trajectory
@@ -139,32 +138,39 @@ double calculate_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory
 
 TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions){
 
-  // copy ego vehicle's trajectory
-  vector<Vehicle::snapshot> t = trajectory;
-
   // current ego vehicle state
-  Vehicle::snapshot current_snapshot = t[0];
+  Vehicle::snapshot current_snapshot = trajectory[0];
+
   // first ego vehicle state in the trajectory
-  Vehicle::snapshot first = t[1];
+  Vehicle::snapshot first = trajectory[1];
+
   // last ego vehicle state in the trajectory
-  Vehicle::snapshot last = t.back();
+  Vehicle::snapshot last = trajectory.back();
+
+  int proposed_lane = first.lane;
+
+  // end of trajectory number of lanes from goal
+  int end_lanes_from_goal = abs(vehicle_ptr->goal_lane - proposed_lane);
 
   // delta t over the whole trajectory
   double dt = double(trajectory.size());
 
-  int proposed_lane = first.lane;
+  // avg speed over the whole trajectory
   double avg_speed = (last.s - current_snapshot.s) / dt;
 
   // initialize a bunch of variables
-  vector<int> accels;
-  int closest_approach;
-  closest_approach = 999999;
+
+  // acceleration over the whole trajectory
+  vector<double> accels;
+
+  // closest vehicle in proposed lane along s axis.. (either in front or behind)
+  double closest_approach = 999999.0;
+
+  // collision event initialisation
   Vehicle::collider collides;
   collides.collision = false;
-  Vehicle::snapshot last_snap;
-  last_snap = trajectory[0];
 
-  // Extract only the predictions for vehicles in ego vehicle's lane
+  // Extract only the predictions for vehicles in ego vehicle's target lane
   map<int,vector < vector<double> > > filtered = filter_predictions_by_lane(predictions, proposed_lane);
 
   // for a number of future time steps
@@ -174,7 +180,7 @@ TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> t
     Vehicle::snapshot snapshot = trajectory[i];
     accels.push_back(snapshot.a);
 
-    // for all other cars in our lane (not ego)
+    // for all other cars in ego vehicle's target lane
     map<int, vector<vector<double> > >::iterator it = filtered.begin();
     while(it != filtered.end())
     {
@@ -193,10 +199,10 @@ TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> t
 
       if (vehicle_collides){
         collides.collision = true;
-        collides.time = i;
+        collides.time = double(i);
       }
       // target vehicle's distance from ego vehicle
-      int dist = abs(vehicle_state[1] - snapshot.s);
+      double dist = abs(vehicle_state[1] - snapshot.s);
 
       // this target vehicle is the closest approach
       if (dist < closest_approach)
@@ -204,26 +210,24 @@ TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> t
 
       it++;
     }
-
-    last_snap = snapshot;
   }
 
   // absolute max acceleration
-  int max_accel = 0;
+  double max_accel = 0.0;
   for(int i=0; i<accels.size(); i++){
     if(abs(accels[i]) >= max_accel)
       max_accel = abs(accels[i]);
   }
 
   // rms accelerations
-  vector<int> rms_accels;
+  vector<double> rms_accels;
   for(int i=0; i<accels.size(); i++){
-    rms_accels.push_back(pow(accels[i],2));
+    rms_accels.push_back(pow(accels[i],2.0));
   }
 
   double rms_acceleration=0.0;
   for(int i=0; i<rms_accels.size(); i++){
-    rms_acceleration += double(rms_accels[i]);
+    rms_acceleration += rms_accels[i];
   }
   rms_acceleration /= rms_accels.size();
 
@@ -236,6 +240,7 @@ TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> t
   traj_data.closest_approach = closest_approach;
   traj_data.collides.collision =  collides.collision;
   traj_data.collides.time =  collides.time;
+  traj_data.end_lanes_from_goal = end_lanes_from_goal;
 
   return traj_data;
 }

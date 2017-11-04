@@ -76,23 +76,11 @@ the path has processed since last time.
     cd uWebSockets
     git checkout e94b6e1
     ```
-
-
-
-
-
-
-
-
-
-
-
-
 ## Rubric points
 
 #### Provide a reflection on how to generate paths
 
-The final approach I used for trajectory generation was based on the walkthrough video. The spline approach isn't as neat and elegant as the Jerk Minimizing Spline method but it was way easier and was able to effectively drive the vehicle in the simulator to meet requirements. Once I figured out the basic waypoints generation, I adapted the classes and methods that I already coded to solve the extremely difficult lesson's 4.16 quizz. 
+The final approach I used for trajectory generation was based on the walkthrough video. The spline approach isn't as neat and elegant as the Jerk Minimizing Spline method but it was way easier and was able to effectively drive the vehicle in the simulator to meet requirements. Once I figured out the basic waypoints generation, I adapted the classes and methods that I already coded (according to the python example) to solve the difficult lesson's 4.16 quizz. 
 
 ##### Implementation summary
 

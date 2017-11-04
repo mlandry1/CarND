@@ -88,65 +88,47 @@ the path has processed since last time.
 
 
 
-##Rubric points
+## Rubric points
 
 #### Provide a reflection on how to generate paths
 
-This implementation is summarized in the following five steps:
+The final approach I used for trajectory generation was based on the walkthrough video. The spline approach isn't as neat and elegant as the Jerk Minimizing Spline method but it was way easier and was able to effectively drive the vehicle in the simulator to meet requirements. Once I figured out the basic waypoints generation, I adapted the classes and methods that I already coded to solve the extremely difficult lesson's 4.16 quizz. 
 
+##### Implementation summary
 
-1. Construct Interpolated Waypoints of Nearby Area
+The ego vehicle state and its associated (self-explanatory) methods are contained in the Vehicle class. These methods include `update_FSM_state`, which update the finite state machine state (i.e. "keep lane", "lane change left", "lane change right"), `_trajectory_for_FSM_state`,  `realize_FSM_state`,  `generate_predictions`,etc..).
 
-The track waypoints given in the highway_map.csv file are spaced roughly 30 meters apart, so the first step in the process is to interpolate a set of nearby map waypoints (in the current implementation, five waypoints ahead of and five waypoints behind the ego vehicle are used) and produce a set of much more tightly spaced (0.5 meters apart) waypoints which help to produce more accurate results from the getXY and getFrenet methods and also account for the discontinuity in s values at the end/beginning of the track.
+The ego vehicle object is first created and then included to a global list of vehicles. Then the sensor fusion data is parsed and vehicle objects are created and included to the list for each vehicle reported. 
 
-2. Determine Ego Car Parameters and Construct Vehicle Object
+Trajectories for each of the car in the list are then generated (lines 292-302 of `main.cpp`). These trajectories are assuming constant accelerations and no lane change. 
 
-The simulator returns instantaneous telemetry data for the ego vehicle, but it also returns the list of points from previously generated path. This is used to project the car's state into the future and a "planning state" is determined based on the difference between points at some prescribed number of points along the previous path. In effect, this can help to generate smoother transitions, handle latency from transmission between the controller and the simulator, and alleviate the trajectory generator of some computation overhead.
+Using the update_FSM_state (line 310 of `main.cpp`), each possible Finite State Machine state is explored by generating teh corresponding ego vehicle trajectory (lines 141-154 of `vehicle.cpp`) taking into account the predictions of all the other vehicles.
 
-The vehicle state and its associated (self-explanatory) methods are contained in the Vehicle class. These methods include update_available_states (i.e. "keep lane", "lane change left", "lane change right"), get_target_for_state, generate_trajectory_for_target, get_leading_vehicle_data_for_lane, and generate_predictions (for sensor fusion data).
+A set of cost functions is then used to determine what is the best trajectory for the ego car. These cost functions include (see `cost.cpp`):
 
-3. Generate Predictions from Sensor Fusion Data
+* `change_lane_cost` :  penalizes lane changes and penalizes driving in any lane other than the center.
+* `inefficiency_cost` : penalizes lower/higher speed than requested (22.21m/s ~ 49.68mph).
+* `collision_cost` : penalizes a trajectory that collides with any predicted vehicle trajectories.
+* `buffer_cost` : penalizes a short distance between ego vehicle and closest vehicle in front.
 
-The sensor fusion data received from the simulator in each iteration is parsed and trajectories for each of the other cars on the road are generated. These trajectories match the duration and interval of the ego car's trajectories generated for each available state and are used in conjunction with a set of cost functions to determine a best trajectory for the ego car. A sample of these predicted trajectories (along with the ego car's predicted trajectory) is shown below.
+Once the FSM state is chosen, the `realize_FSM_state` (line 335 of `main.cpp`) method of the ego vehicle is called. The method updates the acceleration setpoint and the lane setpoint by taking into account the predicted trajectories of the other cars. Then the speed setpoint is updated accordingly (line 352 of `main.cpp`). In the end, the last thing left to do is to generate a Jerk minimizing trajectory to send to the simulator.
 
-#### Determine Best Trajectory
+The track center's waypoints are given in the highway_map.csv file. So the first step in the process of generating such a trajectory is to compute a set of widely spaced nearby waypoints ahead of the ego vehicle. These waypoints will then be interpolated using the "spline.h" helper header file. 
 
-Using the ego car "planning state", sensor fusion predictions, and Vehicle class methods mentioned above, an optimal trajectory is produced.
+The simulator returns instantaneous telemetry data for the ego vehicle, but it also returns the list of points from previously generated path. The latter is used as a starting point for the newly generated path. In fact, the two first waypoints of the new trajectory always overlaps with the last points of the previous path in order to ensure a smooth connection between the 2 (see lines 366-395 of `main.cpp`). Then 3 more waypoints are generated along the highway according to the desired target lane and the highway map with 30m between each points.
 
-Available states are updated based on the ego car's current position, with some extra assistance from immediate sensor fusion data (I think of this similar to ADAS, helping to, for example, prevent "lane change left" as an available state if there is a car immediately to the left).
-Each available state is given a target Frenet state (position, velocity, and acceleration in both s and d dimensions) based on the current state and the traffic predictions.
-A quintic polynomial, jerk-minimizing (JMT) trajectory is produced for each available state and target (*note: although this trajectory was used for the final path plan in a previous approach, in the current implementation the JMT trajectory is only a rough estimate of the final trajectory based on the target state and using the spline.h library).
-Each trajectory is evaluated according to a set of cost functions, and the trajectory with the lowest cost is selected. In the current implementation, these cost functions include:
+The trajectory being fed to the simulator is always 50 points long (lines 450-471 of `main.cpp`). The first points are composed of the previous path. The remaining points are the result of the spline interpolation of the 5 generated waypoints. Finaly, the interpolated points are being spaced according to the speed setpoint.
 
-* Collision cost: penalizes a trajectory that collides with any predicted traffic trajectories.
-* Buffer cost: penalizes a trajectory that comes within a certain distance of another traffic vehicle trajectory.
-* In-lane buffer cost: penalizes driving in lanes with relatively nearby traffic.
-* Efficiency cost: penalizes trajectories with lower target velocity.
-* Not-middle-lane cost: penalizes driving in any lane other than the center in an effort to maximize available state options.
+##### Conclusion
 
-
-#### Produce New Path
-
-The new path starts with a certain number of points from the previous path, which is received from the simulator at each iteration. From there a spline is generated beginning with the last two points of the previous path that have been kept (or the current position, heading, and velocity if no current path exists), and ending with two points 30 and 60 meters ahead and in the target lane. This produces a smooth x and y trajectory. To prevent excessive acceleration and jerk, the velocity is only allowed increment or decrement by a small amount, and the corresponding next x and y points are calculated along the x and y splines created earlier.
-
-
-
-#### Conclusion
-
-The resulting path planner works well, but not perfectly. It has managed to accumulate incident-free runs of over ten miles multiple times, and once navigating the track incident-free for over twenty miles (for which the image below is evidence). Improving the planner from this point is difficult due to the infrequency of infractions and inability to duplicate the circumstances that led up to an infraction. Overall, I am very satisfied with its performance.
-
+The resulting path planner works well, but not perfectly. It has managed to accumulate incident-free runs of over ten miles multiple times, and once navigating the track incident-free for over twenty miles. I think that it satifies the requirements for this project.
 
 ## Final Result
-Up to 17miles wihout incidents (acceleration/jerk limit violation).
+Up to 16miles wihout incidents (acceleration/jerk limit violation).
 <img src=./images/path_planning.png width="700">
 
-Video of one complete lap.
-<img src=./images/path_planning.png width="700"href="https://www.w3schools.com">
-
-[![Complete lap](./images/giphy.gif =500x)](https://www.youtube.com/watch?v=dCEQEot9mAM)
-
-<img src="https://camo.githubusercontent.com/..." data-canonical-src="https://gyazo.com/eb5c5741b6a9a16c692170a41a49c858.png" width="200" height="400" />
-
-<a href="https://meta.stackoverflow.com/users/44330/jason-s">
-   <img src="https://www.gravatar.com/avatar/dd5a7ef1476fb01998a215b1642dfd07?s=128&d=identicon&r=PG">
+Video of a complete lap.
+<a href="https://www.youtube.com/watch?v=dCEQEot9mAM">
+   <img src="./images/giphy.gif" width="700" alt="Youtube Link">
 </a>
+

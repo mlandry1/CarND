@@ -125,9 +125,11 @@ The resulting path planner works well, but not perfectly. It has managed to accu
 
 ## Final Result
 Up to 16miles wihout incidents (acceleration/jerk limit violation).
+
 <img src=./images/path_planning.png width="700">
 
 Video of a complete lap.
+
 <a href="https://www.youtube.com/watch?v=dCEQEot9mAM">
    <img src="./images/giphy.gif" width="700" alt="Youtube Link">
 </a>

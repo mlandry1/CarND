@@ -131,7 +131,7 @@ Eigen::VectorXd simulation(Eigen::VectorXd state, Eigen::VectorXd coeffs, double
 
 ## Final result
 
-[![MPC_90MPH](./images/MPC_90mph.gif)]()
+[![MPC_90MPH](./images/MPC_90mph.gif)](https://youtu.be/_aRpuhZUEpY)
 
 ## Dependencies
 

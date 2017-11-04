@@ -9,15 +9,13 @@
 #include <algorithm>
 #include "assert.h"
 
-#define DEBUG_VEHICLE true
-#define DELTA_T_PREDICTION 0.35  //timestep for trajectory predictions
-
 /**
  * Initializes Vehicle
  */
 Vehicle::Vehicle(int lane, double x, double y, double s, double d, double v, double yaw, double a) {
 
   this->lane = lane;
+  this->laneSP = lane;
   this->x = x;
   this->y = y;
   this->s = s;
@@ -33,9 +31,8 @@ Vehicle::~Vehicle() {}
 
 Vehicle::snapshot Vehicle::get_snapshot(){
   Vehicle::snapshot snapshot_temp;
-  snapshot_temp.lane       = this->lane;
+  snapshot_temp.laneSP     = this->laneSP;
   snapshot_temp.s          = this->s;
-  snapshot_temp.end_path_s = this->end_path_s;
   snapshot_temp.v          = this->v;
   snapshot_temp.a          = this->a;
   snapshot_temp.FSM_state  = this->FSM_state;
@@ -44,9 +41,8 @@ Vehicle::snapshot Vehicle::get_snapshot(){
 }
 
 void Vehicle::restore_state_from_snapshot(Vehicle::snapshot snapshot_temp){
-  this->lane       = snapshot_temp.lane;
+  this->laneSP     = snapshot_temp.laneSP;
   this->s          = snapshot_temp.s;
-  this->end_path_s = snapshot_temp.end_path_s;
   this->v          = snapshot_temp.v;
   this->a          = snapshot_temp.a;
   this->FSM_state  = snapshot_temp.FSM_state;
@@ -95,10 +91,6 @@ void Vehicle::update_FSM_state(map<int,vector < vector<double> > > predictions) 
    - The vehicle will IMMEDIATELY change lanes and then follow longitudinal
      behavior for the "KL" FSM_state in the new lane.
 
-  "PLCL" or "PLCR" - Prepare for Lane Change Left / Right
-   - The vehicle will find the nearest vehicle in the adjacent lane which is
-     BEHIND itself and will adjust speed to try to get behind that vehicle.
-
   INPUTS
   - predictions
   A dictionary. The keys are ids of other vehicles and the values are arrays
@@ -119,27 +111,19 @@ void Vehicle::update_FSM_state(map<int,vector < vector<double> > > predictions) 
 
   string _FSM_state = this->_get_next_FSM_state(predictions);
 
-  //TODO remove this
-//  _FSM_state = "KL";
-
   this->FSM_state = _FSM_state;
 }
 
 string Vehicle::_get_next_FSM_state(map<int,vector < vector<double> > > predictions) {
-//TODO remove
-//  vector<string> FSM_states = {"KL", "LCL", "LCR", "PLCL", "PLCR"};
+
   vector<string> FSM_states = {"KL", "LCL", "LCR"};
 
   // Remove impossible/unuseful next FSM_states
-  if(this->lane == 0){
+  if(this->laneSP == 0){
     FSM_states.erase(std::remove(FSM_states.begin(), FSM_states.end(), "LCL"), FSM_states.end());
-    //TODO remove
-//    FSM_states.erase(std::remove(FSM_states.begin(), FSM_states.end(), "PLCL"), FSM_states.end());
   }
-  if(this->lane == this->lanes_available - 1){
+  if(this->laneSP == this->lanes_available - 1){
     FSM_states.erase(std::remove(FSM_states.begin(), FSM_states.end(), "LCR"), FSM_states.end());
-    //TODO remove
-//    FSM_states.erase(std::remove(FSM_states.begin(), FSM_states.end(), "PLCR"), FSM_states.end());
   }
 
   // initialize a bunch of variables
@@ -162,7 +146,7 @@ string Vehicle::_get_next_FSM_state(map<int,vector < vector<double> > > predicti
     trajectory = this->_trajectory_for_FSM_state(FSM_states[i], predictions_copy, 5);
 
     if(DEBUG_VEHICLE){
-      std::cout << "--" << FSM_states[i] << "--\tLane\t" << trajectory[1].lane;
+      std::cout << "--" << FSM_states[i] << "--\tLane\t" << trajectory[1].laneSP;
     }
     // compute the cost of the ego vehicle trajectory and note the associated FSM state
     cost.cost = calculate_cost(this, trajectory, predictions);
@@ -188,7 +172,6 @@ void Vehicle::realize_FSM_state(map<int,vector < vector<double> > > predictions,
 
   /*
   Given a state, realize it by adjusting acceleration and lane.
-  Note - lane changes happen instantaneously.
   */
   string FSM_state = this->FSM_state;
   if(FSM_state.compare("CS") == 0)
@@ -207,14 +190,6 @@ void Vehicle::realize_FSM_state(map<int,vector < vector<double> > > predictions,
   {
     realize_lane_change(predictions, "R", verbose);
   }
-  else if(FSM_state.compare("PLCL") == 0)
-  {
-    realize_prep_lane_change(predictions, "L",verbose);
-  }
-  else if(FSM_state.compare("PLCR") == 0)
-  {
-    realize_prep_lane_change(predictions, "R", verbose);
-  }
 
 }
 
@@ -223,7 +198,12 @@ void Vehicle::realize_constant_speed() {
 }
 
 void Vehicle::realize_keep_lane(map<int,vector < vector<double> > > predictions, bool verbose) {
-  this->a = _max_accel_for_lane(predictions, this->lane, this->s, this->end_path_s, verbose);
+
+  if(this->trajectories_simulations)
+    this->lane = this->laneSP;
+
+  // max accel for actual vehicle lane
+  this->a = _max_accel_for_lane(predictions, this->lane, this->s, verbose);
 }
 
 void Vehicle::realize_lane_change(map<int,vector < vector<double> > > predictions, string direction, bool verbose) {
@@ -232,8 +212,13 @@ void Vehicle::realize_lane_change(map<int,vector < vector<double> > > prediction
   {
     delta = 1;
   }
-  this->lane += delta;
-  this->a = _max_accel_for_lane(predictions, this->lane, this->s, this->end_path_s, verbose);
+  this->laneSP += delta;
+
+  if(this->trajectories_simulations)
+    this->lane = this->laneSP;
+
+  // max accel for actual vehicle lane
+  this->a = _max_accel_for_lane(predictions, this->lane, this->s, verbose);
 }
 
 vector<double> Vehicle::state_at(double t) {
@@ -243,11 +228,11 @@ vector<double> Vehicle::state_at(double t) {
   */
   double s = this->s + this->v * t + this->a * t * t / 2;
   double v = this->v + this->a * t;
-  return {double(this->lane), s, v, this->a};
+  return {double(this->laneSP), s, v, this->a};
 }
 
 void Vehicle::increment(double dt) {
-//TODO is it ok?
+
   this->s += this->v * dt + this->a * dt * dt / 2;
   this->v += this->a * dt;
 }
@@ -255,6 +240,7 @@ void Vehicle::increment(double dt) {
 vector<Vehicle::snapshot> Vehicle::_trajectory_for_FSM_state(string FSM_state, map<int,vector < vector<double> > > predictions, int horizon = 5){
   //save ego vehicle state
   Vehicle::snapshot snapshot_temp = this->get_snapshot();
+  this->trajectories_simulations = true;
 
   // pretend to be in new proposed state
   this->FSM_state = FSM_state;
@@ -265,20 +251,15 @@ vector<Vehicle::snapshot> Vehicle::_trajectory_for_FSM_state(string FSM_state, m
 
   // for each given time horizon
   for(int i=0; i<int(double(horizon)/DELTA_T_PREDICTION); i++){
-    // restore to the original ego vehicle state
-//    this->restore_state_from_snapshot(snapshot_temp);
-    // restore to the original ego vehicle lane
-    this->lane = snapshot_temp.lane;
-
-    // FSM state
-//    this->FSM_state = FSM_state;
+    // restore to the original ego vehicle lane SP
+    this->laneSP = snapshot_temp.laneSP;
+    this->lane = this->laneSP;
     // realize FSM state (gives the lane and the acceleration for the timestep)
     this->realize_FSM_state(predictions, false);
     //ensure the vehicle is still in an existing lane..
-    assert(0 <= this->lane && this->lane < this->lanes_available);
+    assert(0 <= this->laneSP && this->laneSP < this->lanes_available);
     // increment simulation
     this->increment(DELTA_T_PREDICTION);
-    this->end_path_s = this->s + this->v * this->path_update_delay;
     // include incremented vehicle state in the trajectory..
     trajectory.push_back(this->get_snapshot());
 
@@ -295,12 +276,12 @@ vector<Vehicle::snapshot> Vehicle::_trajectory_for_FSM_state(string FSM_state, m
   }
 
   // restore original vehicle state
+  this->trajectories_simulations = false;
   this->restore_state_from_snapshot(snapshot_temp);
   return trajectory;
 }
 
-// TODO: enlever end_path_s des arguments??
-double Vehicle::_max_accel_for_lane(map<int,vector < vector<double> > > predictions, int lane, double s, double end_path_s, bool verbose) {
+double Vehicle::_max_accel_for_lane(map<int,vector < vector<double> > > predictions, int lane, double s, bool verbose) {
 
   double delta_v_til_target = this->target_speed - this->v;
   // either max_acceleration, or delta_v over 1s..
@@ -316,31 +297,50 @@ double Vehicle::_max_accel_for_lane(map<int,vector < vector<double> > > predicti
 
     vector<vector<double> > v = it->second;
 
+    // For each car in front of ego, put in a list..
     if((v[0][0] == double(lane)) && (v[0][1] > s) && v_id != -1)
     {
       in_front.push_back(v);
     }
+    // Takes into account the loop arround the track (after s = 6946 m comes s = 0 m)
+    else if((v[0][0] == double(lane)) && (v[0][1] < s) && ((v[0][1]+TRACK_LENGTH - s) < (TRACK_LENGTH/2)) && v_id != -1)
+    {
+      in_front.push_back(v);
+    }
+
     it++;
   }
 
   // if there is at least one vehicle in front of the target s value in the target lane
   if(in_front.size() > 0)
   {
-    double min_s = 1000;
+    double min_s = TRACK_LENGTH;
     vector<vector<double>> leading = {};
     // for all the vehicle in front of the target s value in the target lane
     for(int i = 0; i < in_front.size(); i++)
     {
+      double diff_s = in_front[i][0][1] - s;
+      // corrects the difference when completing a loop
+      if(diff_s < 0)
+        diff_s = diff_s + TRACK_LENGTH;
+
       // find the car right in front of the target s value in the target lane
-      if((in_front[i][0][1]-s) < min_s)
+      if(diff_s < min_s)
       {
-        min_s = (in_front[i][0][1]-s);
+        min_s = diff_s;
         leading = in_front[i];
       }
     }
 
+    // take into account loop completion..
+    double act_diff_s_leading = leading[0][1] - s;
+    double next_pos = 0;
     // car in front next position
-    double next_pos = leading[1][1];
+    if(act_diff_s_leading < 0)
+      next_pos = leading[1][1] + TRACK_LENGTH;
+    else
+      next_pos = leading[1][1];
+
     // ego next position
     double my_next = s + this->v * 1.0 + this->a * 1.0 * 1.0 / 2;
     // supposed to be positive !
@@ -363,87 +363,6 @@ double Vehicle::_max_accel_for_lane(map<int,vector < vector<double> > > predicti
   return max_acc;
 }
 
-void Vehicle::realize_prep_lane_change(map<int,vector < vector<double> > > predictions, string direction, bool verbose) {
-  //TODO: inclure une référence à ça ? this->end_path_s
-
-  int delta = -1;
-  if (direction.compare("R") == 0)
-  {
-    delta = 1;
-  }
-  int lane = this->lane + delta;
-
-  map<int, vector<vector<double> > >::iterator it = predictions.begin();
-
-  // creates a list of cars behind the ego vehicle in target lane
-  vector<vector<vector<double> > > at_behind;
-  while(it != predictions.end())
-  {
-    int v_id = it->first;
-    vector<vector<double> > v = it->second;
-
-    if((v[0][0] == lane) && (v[0][1] <= this->s))
-    {
-      at_behind.push_back(v);
-    }
-    it++;
-  }
-  // if there is at least one vehicle behind ego vehicle in target lane
-  if(at_behind.size() > 0)
-  {
-
-    double max_s = -1000;
-    vector<vector<double> > nearest_behind = {};
-    for(int i = 0; i < at_behind.size(); i++)
-    {
-      // find the nearest car behind ego in target lane
-      if((at_behind[i][0][1]) > max_s)
-      {
-        max_s = at_behind[i][0][1];
-        nearest_behind = at_behind[i];
-      }
-    }
-    double target_vel = nearest_behind[1][1] - nearest_behind[0][1];
-    double delta_v = this->v - target_vel;
-    double delta_s = this->s - nearest_behind[0][1];
-    // TODO : put a tolerance here ??
-    if(delta_v != 0.0)
-    {
-      // time behind ego vehicle
-      double t = -2 * delta_s/delta_v;
-      // acceleration
-      double a;
-      // if nearest behind vehicle is too close don't change actual accel
-      // TODO: put a tolerance here to take vehicle size into consideration??
-      if (t == 0)
-      {
-        a = this->a;
-      }
-      else
-      {
-        //
-        a = delta_v/t;
-      }
-      if(a > this->max_acceleration)
-      {
-        a = this->max_acceleration;
-      }
-      if(a < -this->max_acceleration)
-      {
-        a = -this->max_acceleration;
-      }
-      this->a = a;
-    }
-    else
-    {
-      // TODO: see if we need a factor on delta_s..
-      // if delta_v==0 then slow down to close the gap?
-      double my_min_acc = max(-this->max_acceleration,-delta_s);
-      this->a = my_min_acc;
-    }
-  }
-}
-
 bool Vehicle::collides_with(Vehicle other, int at_time) {
 
   /*
@@ -452,23 +371,4 @@ bool Vehicle::collides_with(Vehicle other, int at_time) {
   vector<double> check1 = this->state_at(at_time);
   vector<double> check2 = other.state_at(at_time);
   return (check1[0] == check2[0]) && (abs(check1[1]-check2[1]) <= this->L);
-}
-
-Vehicle::collider Vehicle::will_collide_with(Vehicle other, int timesteps) {
-
-  Vehicle::collider collider_temp;
-  collider_temp.collision = false;
-  collider_temp.time = -1;
-
-  for (int t = 0; t < timesteps+1; t++)
-  {
-        if( collides_with(other, t) )
-        {
-      collider_temp.collision = true;
-      collider_temp.time = t;
-          return collider_temp;
-      }
-  }
-
-  return collider_temp;
 }

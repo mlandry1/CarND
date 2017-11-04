@@ -26,15 +26,15 @@ public:
   };
 
   struct snapshot{
-    int lane;          // lane number
+    int laneSP;        // lane number
     double s;          // distance (frenet coordinate)
-    double end_path_s; // end_path_s
     double v;          // actual speed
     double a;          // actual acceleration
     string FSM_state;  // actual FSM state (Keep Lane, Lane Change Right/Left, Prepare For Lane Change Right/Left)
   };
 
-  int lane;       // lane number
+  int lane;        // actual lane number
+  int laneSP;      // lane setpoint to generate trajectory
 
   // World coordinates
   double x;       // x world coordinate       in m
@@ -44,9 +44,6 @@ public:
   double s;       // distance along the road  in m
   double d;       // distance across the road in m
 
-  double end_path_s = -1; // Frenet at the end of the path
-  double end_path_d = -1; // Frenet at the end of the path
-
   double v;       // actual vehicle speed     in m/s
   double yaw;     // actual vehicle heading   in rad
   double a;       // actual acceleration      in m/s²
@@ -55,12 +52,11 @@ public:
   string FSM_state;              // actual FSM state (Keep Lane, Lane Change Right/Left, Prepare For Lane Change Right/Left)
   double L = 5.4;                // typical car length
   double preferred_buffer = 6;   // impacts "keep lane" behavior.
-  double path_update_delay = 0.94; // in s
 
   double target_speed = -1;
   int lanes_available = -1;
   double max_acceleration = -1;
-  int goal_lane = 1;
+  bool trajectories_simulations = false;
 
   /**
   * Constructor
@@ -93,19 +89,15 @@ public:
 
   bool collides_with(Vehicle other, int at_time);
 
-  collider will_collide_with(Vehicle other, int timesteps);
-
   void realize_FSM_state(map<int, vector < vector<double> > > predictions, bool verbose);
 
   void realize_constant_speed();
 
-  double _max_accel_for_lane(map<int,vector < vector<double> > > predictions, int lane, double s, double end_path_s, bool verbose);
+  double _max_accel_for_lane(map<int,vector < vector<double> > > predictions, int lane, double s, bool verbose);
 
   void realize_keep_lane(map<int,vector < vector<double> > > predictions, bool verbose);
 
   void realize_lane_change(map<int,vector < vector<double> > > predictions, string direction, bool verbose);
-
-  void realize_prep_lane_change(map<int,vector < vector<double> > > predictions, string direction, bool verbose);
 
   vector<vector<double> > generate_predictions(int horizon);
 

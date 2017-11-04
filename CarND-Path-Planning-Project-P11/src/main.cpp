@@ -12,17 +12,6 @@
 #include "vehicle.h"
 #include "cost.h"
 
-#define DELTA_T 0.02
-#define DESIRED_BUFFER 30.0  //m
-#define DEBUG true
-
-#define MAX_JERK     50.0   // m/s³
-#define MAX_ACCEL    9.81   // m/s²
-#define SPEED_LIMIT  22.21  // 22.352m/s  // 50 MPH in m/s
-
-#define NUM_LANES    3
-#define NUM_PATH_POINTS 50
-
 using namespace std;
 
 // for convenience
@@ -253,15 +242,16 @@ int main() {
           ego.s = j[1]["s"];              // in m
           ego.d = j[1]["d"];              // in m
 
-          ego.yaw = deg2rad(j[1]["yaw"]);           // in rad
+          ego.yaw = deg2rad(j[1]["yaw"]); // in rad
+
 
           // Previous path data given to the Planner
           auto previous_path_x = j[1]["previous_path_x"];
           auto previous_path_y = j[1]["previous_path_y"];
 
           // Previous path's end s and d values
-          ego.end_path_s = j[1]["end_path_s"];
-          ego.end_path_d = j[1]["end_path_d"];
+          double end_path_s = j[1]["end_path_s"];
+          double end_path_d = j[1]["end_path_d"];
 
           // Sensor Fusion Data, a list of all other cars on the same side of the road.
           auto sensor_fusion = j[1]["sensor_fusion"];
@@ -327,12 +317,17 @@ int main() {
           if(delta_t > 5*DELTA_T)
             delta_t = 5*DELTA_T;
 
+          // Ego lane update..
+          ego.lane = int(ego.d/4);
+
           if(DEBUG){
             std::cout << std::string(100, '*') << "\n\n" <<
                 std::string(100, '*') << "\n" <<
                 "--" << ego.FSM_state << "--" <<
-                "\tLane\t"<< ego.lane <<
-                "\tdelta_t\t: " << delta_t << " s\n" <<
+                "\tActual lane\t"<< ego.lane <<
+                "\tTarget lane\t"<< ego.laneSP <<
+                "\tdelta_t\t: " << delta_t << " s" <<
+                "\t\ts:  " << ego.s << " m\n" <<
                 std::string(100, '*') << "\n" << std::endl;
           }
 
@@ -350,7 +345,7 @@ int main() {
           if(prev_size >0 )
           {
             // let's modify our current car position and take it to the last position of the previous path
-            ego.s = ego.end_path_s;
+            ego.s = end_path_s;
           }
 
           // update ego speed to obtain ego.a over the trajectory to be generated
@@ -400,9 +395,9 @@ int main() {
           }
 
           // In Frenet add evenly 30m spaced points ahead of the starting reference
-          vector<double> next_wp0 = getXY(ego.s+30,(2+4*ego.lane),map_waypoints_s,map_waypoints_x,map_waypoints_y);
-          vector<double> next_wp1 = getXY(ego.s+60,(2+4*ego.lane),map_waypoints_s,map_waypoints_x,map_waypoints_y);
-          vector<double> next_wp2 = getXY(ego.s+90,(2+4*ego.lane),map_waypoints_s,map_waypoints_x,map_waypoints_y);
+          vector<double> next_wp0 = getXY(ego.s+30,(2+4*ego.laneSP),map_waypoints_s,map_waypoints_x,map_waypoints_y);
+          vector<double> next_wp1 = getXY(ego.s+60,(2+4*ego.laneSP),map_waypoints_s,map_waypoints_x,map_waypoints_y);
+          vector<double> next_wp2 = getXY(ego.s+90,(2+4*ego.laneSP),map_waypoints_s,map_waypoints_x,map_waypoints_y);
 
           ptsx.push_back(next_wp0[0]);
           ptsx.push_back(next_wp1[0]);

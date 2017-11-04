@@ -1,37 +1,25 @@
 #include "vehicle.h"
 #include "cost.h"
 #include <iostream>
-//#include <random>
-//#include <sstream>
-//#include <fstream>
 #include <math.h>
 #include <vector>
 #include <map>
 #include <string>
 #include <iterator>
 
-// priority levels for costs
-#define COLLISION  10000000
-#define DANGER     1000000
-#define COMFORT    0
-#define EFFICIENCY 1000
-
-#define PLANNING_HORIZON  2
-#define DESIRED_BUFFER2   1.5 // timestep
-
-#define DEBUG_COST true
 
 double change_lane_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
 
-  // Penalizes lane changes
-
-  int proposed_lanes = data.end_lanes_from_goal;
-  int cur_lanes = trajectory[0].lane - vehicle_ptr->goal_lane;
+  // Penalizes lane changes and penalizes driving in any lane other than the center
+  int proposed_lane = trajectory[1].laneSP;
+  int cur_lane = trajectory[0].laneSP;
   double cost = 0.0;
-  if (proposed_lanes > cur_lanes)
+  // If a change is proposed
+  if (proposed_lane != cur_lane)
     cost = COMFORT;
-  if (proposed_lanes < cur_lanes)
-    cost = -COMFORT;
+  // if the proposed lane isn't the middle lane
+  if (proposed_lane != 1)
+    cost += COMFORT*6;
 
   return cost;
 }
@@ -39,7 +27,6 @@ double change_lane_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajecto
 double inefficiency_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
 
   // Penalizes lower/higher speed than requested
-
   double speed = data.avg_speed;
   double target_speed = double(vehicle_ptr->target_speed);
   double diff = target_speed - speed;
@@ -53,8 +40,8 @@ double inefficiency_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> traject
 double collision_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, map<int,vector < vector<double> > > predictions, TrajectoryData data){
   double cost;
   if (data.collides.collision){
-    int time_til_collision = data.collides.time;
-    double exponent = pow(double(time_til_collision), 2.0);
+    double time_til_collision = data.collides.time;
+    double exponent = pow(time_til_collision, 2.0);
     double mult = exp(-exponent);
 
     cost = mult * COLLISION;
@@ -69,16 +56,15 @@ double buffer_cost(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> trajectory, m
   // Penalizes a short distance between ego vehicle and closest vehicle in front
 
   double cost;
-  double closest;
-  closest = (double)data.closest_approach;
-  if (closest == 0.0)
+  double closest = data.closest_approach;
+  if ( 0 <= closest && closest <= vehicle_ptr->L)
     cost = 10 * DANGER;
   else {
     double timesteps_away = closest / abs(data.avg_speed);
-    if(timesteps_away > DESIRED_BUFFER2)
+    if(timesteps_away > DESIRED_TIME_BUFFER)
       cost = 0.0;
     else {
-      double multiplier = 1.0 - pow(timesteps_away/DESIRED_BUFFER2,2);
+      double multiplier = 1.0 - pow(timesteps_away/DESIRED_TIME_BUFFER,2);
       cost = multiplier * DANGER;
     }
   }
@@ -126,10 +112,7 @@ TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> t
   // last ego vehicle state in the trajectory
   Vehicle::snapshot last = trajectory.back();
 
-  int proposed_lane = first.lane;
-
-  // end of trajectory number of lanes from goal
-  int end_lanes_from_goal = abs(vehicle_ptr->goal_lane - proposed_lane);
+  int proposed_lane = first.laneSP;
 
   // delta t over the whole trajectory
   double dt = double(trajectory.size());
@@ -142,7 +125,7 @@ TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> t
   // acceleration over the whole trajectory
   vector<double> accels;
 
-  // closest vehicle in proposed lane along s axis.. (either in front or behind)
+  // closest vehicle in proposed lane along s axis, either in front or behind, over the whole trajectory
   double closest_approach = 999999.0;
 
   // collision event initialisation
@@ -153,7 +136,7 @@ TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> t
   map<int,vector < vector<double> > > filtered = filter_predictions_by_lane(predictions, proposed_lane);
 
   // for a number of future time steps
-  for(int i=1; i < PLANNING_HORIZON+1; i++) {
+  for(int i=1; i < int(double(PLANNING_HORIZON)/DELTA_T_PREDICTION)+1; i++) {
 
     // ego vehicle state snapshot
     Vehicle::snapshot snapshot = trajectory[i];
@@ -219,7 +202,6 @@ TrajectoryData get_helper_data(Vehicle* vehicle_ptr, vector<Vehicle::snapshot> t
   traj_data.closest_approach = closest_approach;
   traj_data.collides.collision =  collides.collision;
   traj_data.collides.time =  collides.time;
-  traj_data.end_lanes_from_goal = end_lanes_from_goal;
 
   return traj_data;
 }

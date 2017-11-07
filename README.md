@@ -18,6 +18,11 @@ Recommended order for exploring these projects is as follows:
 - PID Controller - P9
 - Model Predictive Control - P10
 
+### Term 3
+- Model Predictive Control - P11
+
+The other projects (P12 and P13) have their own repo.
+
 ## About this Course
 
 Self-driving cars represent one of the most significant advances in modern history. Their impact will go beyond technology, beyond transportation, beyond urban planning to change our daily lives in ways we have yet to imagine.

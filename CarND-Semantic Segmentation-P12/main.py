@@ -72,13 +72,13 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                              kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # 1x1 convolution of vgg layer 4
-    #conv_1x1_layer4 = tf.layers.conv2d(vgg_layer4_out, num_classes, 1,
-    #                                   padding='same',
-    #                                   kernel_initializer=tf.random_normal_initializer(stddev=0.01),
-    #                                   kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+    conv_1x1_layer4 = tf.layers.conv2d(vgg_layer4_out, num_classes, 1,
+                                       padding='same',
+                                       kernel_initializer=tf.random_normal_initializer(stddev=0.01),
+                                       kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # skip connection (element-wise addition)
-    skip_connection_layer4 = tf.add(upsample_2x, vgg_layer4_out)
+    skip_connection_layer4 = tf.add(upsample_2x, conv_1x1_layer4)
 
     # upsample 2x (for a 4x total)
     upsample_4x = tf.layers.conv2d_transpose(skip_connection_layer4, num_classes, 4,
@@ -88,13 +88,13 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
                                              kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # 1x1 convolution of vgg layer 3
-    #conv_1x1_layer3 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1,
-    #                                   padding='same',
-    #                                   kernel_initializer=tf.random_normal_initializer(stddev=0.01),
-    #                                   kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+    conv_1x1_layer3 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1,
+                                       padding='same',
+                                       kernel_initializer=tf.random_normal_initializer(stddev=0.01),
+                                       kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # skip connection (element-wise addition)
-    skip_connection_layer3 = tf.add(upsample_4x, vgg_layer3_out)
+    skip_connection_layer3 = tf.add(upsample_4x, conv_1x1_layer3)
 
     # upsample 8x (for a 32x total)
     output = tf.layers.conv2d_transpose(skip_connection_layer3, num_classes, 16,
@@ -151,7 +151,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
       print("EPOCH {} ...".format(i + 1))
       for image, label in get_batches_fn(batch_size):
         _, loss = sess.run([train_op, cross_entropy_loss],
-                           feed_dict={input_image: image, correct_label: label, keep_prob: 0.5, learning_rate: 0.0009})
+                           feed_dict={input_image: image, correct_label: label, keep_prob: 0.5, learning_rate: 0.0001})
         print("Loss: = {:.3f}".format(loss))
       print()
 tests.test_train_nn(train_nn)
@@ -181,8 +181,8 @@ def run():
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
 
         # Build NN using load_vgg, layers, and optimize function
-        epochs = 50
-        batch_size = 5
+        epochs = 30
+        batch_size = 16
 
         # TF placeholders
         correct_label = tf.placeholder(tf.int32, [None, None, None, num_classes], name='correct_label')

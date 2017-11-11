@@ -20,8 +20,8 @@ Recommended order for exploring these projects is as follows:
 
 ### Term 3
 - Model Predictive Control - P11
-
-The other projects (P12 and P13) have their own repo.
+- [Semantic Segmentation - P12](https://github.com/mlandry1/P12-CarND-Semantic-Segmentation)
+- [Captsone Project - P13](https://github.com/knight-riders/CarND-Capstone-Project)
 
 ## About this Course
 
